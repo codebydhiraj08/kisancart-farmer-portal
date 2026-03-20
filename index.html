@@ -714,7 +714,7 @@
                         <a href="#products" class="text-gray-300 font-medium hover:text-emerald-400 transition">Shop</a>
                         <a href="#contact" class="text-gray-300 font-medium hover:text-emerald-400 transition">Contact</a>
                     </div>
-
+    
                     <div class="relative z-50 hidden lg:block" data-aos="fade-down" data-aos-delay="150">
                         <div class="flex items-center bg-gray-800/60 rounded-full border border-gray-600/50 px-4 py-2 backdrop-blur-sm focus-within:border-emerald-400 transition-all shadow-inner w-60">
                             <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
@@ -722,7 +722,7 @@
                         </div>
                         <div id="searchResultsDropdown" class="absolute top-full right-0 w-72 mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 hidden max-h-80 overflow-y-auto z-[100]"></div>
                     </div>
-
+    
                     <div class="flex items-center gap-4" data-aos="fade-down" data-aos-delay="200">
                         <div class="relative group">
                             <button class="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:text-emerald-400 border border-gray-600 hover:border-emerald-400 transition shadow-sm">
@@ -734,7 +734,7 @@
                                 <button onclick="changeGTranslate('mr')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600">मराठी</button>
                             </div>
                         </div>
-
+    
                         <button onclick="openCart()" class="text-gray-300 hover:text-emerald-400 text-xl transition relative cursor-pointer">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span id="navCartCount" class="hidden absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">0</span>
@@ -746,6 +746,7 @@
                                 <button onclick="toggleProfileDropdown(event)" class="w-10 h-10 bg-gray-800 border border-gray-600 text-emerald-400 rounded-full flex items-center justify-center hover:border-emerald-400 transition">
                                     <i class="fa-solid fa-user"></i>
                                 </button>
+                                
                                 <span id="userNameDisplay" class="hidden"></span>
                                 <div id="profileDropdownMenu" class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl hidden border border-gray-100 z-[100] overflow-hidden">
                                     <a href="#" onclick="openProfilePage(); toggleProfileDropdown(event); return false;" class="flex items-center px-5 py-3 text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 border-b border-gray-50"><div class="w-6 text-center mr-2 text-emerald-500"><i class="fa-regular fa-address-card"></i></div> My Profile</a>
@@ -754,11 +755,24 @@
                                 </div>
                             </div>
                         </div>
+    
+                        <button onclick="toggleMobileMenu()" class="xl:hidden w-10 h-10 ml-2 flex items-center justify-center text-gray-300 hover:text-emerald-400 text-2xl transition focus:outline-none">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
+    
                     </div>
-
                 </div>
             </div>
-        </div>
+    
+            <div id="mobileMenuPanel" class="hidden xl:hidden bg-gray-900/95 backdrop-blur-md border-t border-gray-800 shadow-xl w-full absolute top-full left-0">
+                <div class="px-4 py-3 flex flex-col space-y-2">
+                    <a href="#home" onclick="toggleMobileMenu()" class="px-4 py-3 text-emerald-400 font-bold bg-emerald-500/10 rounded-xl">Home</a>
+                    <a href="our-farmers.html" class="px-4 py-3 text-gray-300 font-medium hover:text-emerald-400 hover:bg-gray-800 rounded-xl transition">Our Farmers</a>
+                    <a href="#" onclick="openAboutPage(); toggleMobileMenu(); return false;" class="px-4 py-3 text-gray-300 font-medium hover:text-emerald-400 hover:bg-gray-800 rounded-xl transition">About Us</a>
+                    <a href="#products" onclick="toggleMobileMenu()" class="px-4 py-3 text-gray-300 font-medium hover:text-emerald-400 hover:bg-gray-800 rounded-xl transition">Shop</a>
+                    <a href="#contact" onclick="toggleMobileMenu()" class="px-4 py-3 text-gray-300 font-medium hover:text-emerald-400 hover:bg-gray-800 rounded-xl transition">Contact</a>
+                </div>
+            </div>
     </nav>
 
     <section id="home" class="relative w-full min-h-screen flex items-center justify-center pt-10 overflow-hidden">
@@ -3576,6 +3590,13 @@
                     console.log("Delivery Update Error:", err);
                 }
             }
+        }
+    </script>
+    <script>
+        // Ye function mobile menu ko kholne aur band karne ka kaam karega
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenuPanel');
+            menu.classList.toggle('hidden');
         }
     </script>
 </body>
