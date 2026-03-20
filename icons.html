@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Icons (Line-Art)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles for presentation */
+        body {
+            background-color: #0d0d12; /* Dark background like reference */
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* 🌟 MAIN CONTAINER FOR ICONS 🌟 */
+        .social-icons-container {
+            display: flex;
+            gap: 25px; /* Spacing between icons, adjust as needed */
+            align-items: center;
+        }
+
+        /* Individual icon link styling */
+        .icon-link {
+            text-decoration: none;
+            color: inherit; /* Keeps it white */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px; /* Icon container size */
+            height: 45px;
+            transition: transform 0.3s ease; /* Animation property */
+        }
+
+        /* 🎨 SVG ICON STYLING - THIS GETS THE EXACT LOOK 🎨 */
+        .icon-link svg {
+            width: 30px;  /* Icon size */
+            height: 30px;
+            fill: none;    /* Critically, make the fill none */
+            stroke: #fff;  /* SET STROKE COLOR TO WHITE */
+            stroke-width: 1.5; /* LINE THICKNESS - ADJUST FOR EXACT LOOK */
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.3s ease; /* Animation on hover */
+        }
+
+        /* Hover animation: Icon turns emerald-400 and pops up slightly, like project buttons */
+        .icon-link:hover {
+            transform: translateY(-5px); /* Pops up on hover */
+        }
+
+        .icon-link:hover svg {
+            stroke: #10b981; /* Emeral 400 - for interactive feedback */
+            /* Add a subtle glow on hover, optional */
+            filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.5));
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="social-icons-container">
+        
+        <a href="https://www.instagram.com/" target="_blank" class="icon-link" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="20" height="20" rx="5" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="5" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+        </a>
+
+        <a href="https://www.facebook.com/" target="_blank" class="icon-link" title="Facebook">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 2H15C12.2386 2 10 4.23858 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.44772 14.4477 6 15 6H18V2Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="https://twitter.com/" target="_blank" class="icon-link" title="X (formerly Twitter)">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.9905 3H19.9678L13.4635 10.4338L21.1157 20.5526H15.1246L10.4319 14.4172L5.06013 20.5526H2.08051L9.03478 12.6049L1.7002 3H7.84365L12.0838 8.60444L16.9905 3ZM15.9451 18.774H17.5947L6.96025 4.6782H5.19032L15.9451 18.774Z" fill="#fff"/>
+            </svg>
+        </a>
+
+        <a href="https://github.com/" target="_blank" class="icon-link" title="GitHub">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 19C4 20.5 4 16.5 2 16M16 22V18.13C16 17.13 15.63 16.27 15.06 15.74C18.66 15.34 22 13.92 22 7.78C22 6.3 21.49 4.96 20.65 3.96C21.1 2.8 21.1 1.41 21.1 1.41C21.1 1.41 20 1.08 17.5 2.77C16.54 2.5 15.53 2.37 14.5 2.37C13.47 2.37 12.46 2.5 11.5 2.77C9 1.08 7.9 1.41 7.9 1.41C7.9 1.41 7.9 2.8 8.35 3.96C7.51 4.96 7 6.3 7 7.78C7 13.92 10.34 15.34 13.94 15.74C13.5 16.14 13.1 16.8 13.1 17.8C13.1 19.34 13 20.5 13 22" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="mailto:your.email@example.com" target="_blank" class="icon-link" title="Contact Me">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+    </div>
+
+</body>
+</html>

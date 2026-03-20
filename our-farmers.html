@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Farmers - KisanCart</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #f8fafc; }
+        
+        /* Premium Hover Effects */
+        .farmer-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .farmer-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); }
+        
+        .gold-glow { box-shadow: 0 0 30px rgba(250, 204, 21, 0.3); }
+        
+        /* Blob Backgrounds */
+        .blob-bg { position: absolute; filter: blur(60px); z-index: -1; opacity: 0.4; }
+
+        /* 🌟 NAYA & IMPROVED: Hawa mein Udte Hue Patte (Fixed Glitch) 🌟 */
+        @keyframes fall-down {
+            0% { transform: translateY(-10vh) rotate(0deg) scale(0.5); opacity: 0; }
+            10% { opacity: 0.5; } /* Jaldi opacity do */
+            80% { opacity: 0.5; }
+            100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+
+        .leaf-anim { 
+            position: absolute; 
+            z-index: 0; 
+            color: #10b981; 
+            /* NEW: Start moving from way off screen so we don't see them freeze */
+            top: -20vh; 
+            animation-name: fall-down;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+    </style>
+</head>
+<body class="text-gray-800 relative overflow-x-hidden">
+
+    <div class="blob-bg w-96 h-96 bg-emerald-300 rounded-full top-0 left-[-100px]"></div>
+    <div class="blob-bg w-[500px] h-[500px] bg-yellow-100 rounded-full top-[20%] right-[-200px]"></div>
+
+    <nav class="bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-emerald-500/30">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                
+                <div class="flex-shrink-0 flex items-center cursor-pointer mr-auto group">
+                    <div class="relative w-12 h-12 flex items-center justify-center mr-3 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg border border-white/10 group-hover:border-emerald-500/50 transition-all duration-500">
+                        <i class="fa-solid fa-hand-holding-heart text-2xl text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"></i>
+                        <i class="fa-solid fa-leaf text-[10px] text-green-400 absolute top-2 right-2 animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-2xl tracking-tighter leading-none notranslate">
+                            Kisan<span class="text-emerald-400">Cart</span>
+                        </h1>
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase opacity-90 mt-1">Our Farmers</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    
+                    <a href="farmer.html" title="Partner With Us" class="w-12 h-12 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center text-gray-300 hover:text-emerald-400 hover:bg-gray-700 hover:border-emerald-500 transition-all duration-300 shadow-inner hover:scale-105">
+                        <i class="fa-solid fa-user-group text-lg"></i>
+                    </a>
+
+                    <a href="index.html" title="Back to Home" class="w-12 h-12 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center text-gray-300 hover:text-emerald-400 hover:bg-gray-700 hover:border-emerald-500 transition-all duration-300 shadow-inner hover:scale-105">
+                        <i class="fa-solid fa-house text-lg"></i>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </nav>
+
+    <div class="relative overflow-hidden w-full bg-transparent">
+        
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <i class="fa-solid fa-leaf leaf-anim" style="left: 15%; animation-duration: 12s; font-size: 1.5rem;"></i>
+            <i class="fa-solid fa-leaf leaf-anim" style="left: 35%; animation-duration: 18s; font-size: 2rem; animation-delay: 2s; opacity: 0.4;"></i>
+            <i class="fa-solid fa-leaf leaf-anim" style="left: 55%; animation-duration: 14s; font-size: 1.2rem; animation-delay: 5s;"></i>
+            <i class="fa-solid fa-leaf leaf-anim" style="left: 80%; animation-duration: 20s; font-size: 2.5rem; animation-delay: 1s; opacity: 0.3;"></i>
+            <i class="fa-solid fa-leaf leaf-anim" style="left: 90%; animation-duration: 16s; font-size: 1.8rem; animation-delay: 4s;"></i>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-16 relative z-10">
+            <div class="text-center mb-16">
+                <span class="text-emerald-500 font-extrabold tracking-widest uppercase text-sm bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100 shadow-sm"><i class="fa-solid fa-award text-yellow-500 mr-1"></i> The Backbone of India</span>
+                <h2 class="text-4xl md:text-6xl font-black text-gray-900 mt-6 mb-4 tracking-tight">Meet Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-400">Farmers</span></h2>
+                <p class="text-gray-500 text-lg max-w-2xl mx-auto font-medium">The first farmers who trusted KisanCart, bypassed the middlemen, and transformed their lives through direct selling.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-10 lg:px-10 mt-12 cursor-pointer">
+                
+                <div onclick="openStory('ramesh')" class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 border-2 border-yellow-400 gold-glow farmer-card relative md:col-start-2 md:row-start-1 z-10 scale-105 mt-8 md:mt-0 group">
+                    <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-4 py-1.5 rounded-full text-xs font-black tracking-widest shadow-lg flex items-center gap-2 uppercase whitespace-nowrap">
+                        <i class="fa-solid fa-crown text-sm"></i> First Partner
+                    </div>
+                    <img src="farmer1.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Ramesh+Patil&background=10b981&color=fff&size=200'" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-4 relative z-10 group-hover:scale-105 transition-transform duration-500">
+                    <div class="text-center relative z-10">
+                        <h3 class="text-2xl font-black text-gray-900">Ramesh Patil</h3>
+                        <p class="text-emerald-600 font-bold text-sm mb-4"><i class="fa-solid fa-location-dot mr-1"></i> Beed Village</p>
+                        <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 text-left">
+                            <p class="text-[10px] uppercase font-extrabold text-gray-400 mb-2">Top Harvest</p>
+                            <div class="flex justify-between items-center bg-white p-2 rounded-lg shadow-sm mb-1">
+                                <span class="font-bold text-sm text-gray-800">🍅 Tomatoes</span>
+                                <span class="text-xs font-bold text-emerald-600">₹30/kg (50kg)</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-white p-2 rounded-lg shadow-sm">
+                                <span class="font-bold text-sm text-gray-800">🧅 Onions</span>
+                                <span class="text-xs font-bold text-emerald-600">₹25/kg (100kg)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="openStory('sunita')" class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 border border-gray-300 shadow-[0_10px_30px_rgba(0,0,0,0.08)] farmer-card md:col-start-1 md:row-start-1 mt-12 md:mt-8 relative z-10 group">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 px-4 py-1 rounded-full text-xs font-black tracking-widest shadow-md flex items-center gap-1.5 uppercase whitespace-nowrap border border-gray-200">
+                        <i class="fa-solid fa-medal"></i> Second Partner
+                    </div>
+                    <img src="farmer21.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Sunita+Ughle&background=10b981&color=fff&size=200'" class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-4 group-hover:scale-105 transition-transform duration-500">
+                    <div class="text-center">
+                        <h3 class="text-xl font-black text-gray-900">Sunita Ughle</h3>
+                        <p class="text-emerald-600 font-bold text-sm mb-4"><i class="fa-solid fa-location-dot mr-1"></i> Nashik Outskirts</p>
+                        <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 text-left">
+                            <p class="text-[10px] uppercase font-extrabold text-gray-400 mb-2">Top Harvest</p>
+                            <div class="flex justify-between items-center bg-white p-2 rounded-lg shadow-sm">
+                                <span class="font-bold text-sm text-gray-800">🥭 Organic Mango</span>
+                                <span class="text-xs font-bold text-emerald-600">₹150/kg (30kg)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="openStory('ashok')" class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 border border-amber-200 shadow-[0_10px_30px_rgba(217,119,6,0.08)] farmer-card md:col-start-3 md:row-start-1 mt-12 md:mt-8 relative z-10 group">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-4 py-1 rounded-full text-xs font-black tracking-widest shadow-md flex items-center gap-1.5 uppercase whitespace-nowrap border border-amber-800">
+                        <i class="fa-solid fa-award"></i> Third Partner
+                    </div>
+                    <img src="farmer3.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Ashok+Jadhav&background=10b981&color=fff&size=200'" class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-4 group-hover:scale-105 transition-transform duration-500">
+                    <div class="text-center">
+                        <h3 class="text-xl font-black text-gray-900">Ashok Jadhav</h3>
+                        <p class="text-emerald-600 font-bold text-sm mb-4"><i class="fa-solid fa-location-dot mr-1"></i> Satara District</p>
+                        <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 text-left">
+                            <p class="text-[10px] uppercase font-extrabold text-gray-400 mb-2">Top Harvest</p>
+                            <div class="flex justify-between items-center bg-white p-2 rounded-lg shadow-sm">
+                                <span class="font-bold text-sm text-gray-800">🥬 Fresh Spinach</span>
+                                <span class="text-xs font-bold text-emerald-600">₹20/bunch (40b)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 py-16 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-5xl font-black text-white mb-4">Our Growing <span class="text-emerald-400">Community</span></h2>
+                <p class="text-gray-400 font-medium max-w-2xl mx-auto">Discover the hardworking faces behind your daily nutrition. All our partners are verified organic growers.</p>
+            </div>
+
+            <div id="dynamicFarmersGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+            
+        </div>
+    </div>
+
+    <div id="storyModal" class="fixed inset-0 z-[300] hidden items-center justify-center bg-gray-900/90 backdrop-blur-md transition-opacity duration-300 p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl relative overflow-hidden transform transition-all scale-95 opacity-0 flex flex-col md:flex-row" id="storyContent">
+            
+            <button onclick="closeStory()" class="absolute top-5 right-6 text-gray-400 hover:text-red-500 text-3xl z-30 transition-colors bg-white rounded-full"><i class="fa-solid fa-circle-xmark"></i></button>
+
+            <div class="md:w-5/12 bg-emerald-50 relative">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent z-10"></div>
+                <img id="storyImage" src="farmer1.jpg" class="w-full h-full object-cover min-h-[300px] md:min-h-full">
+                <div class="absolute bottom-6 left-6 z-20 text-white">
+                    <span id="storyBadge" class="bg-yellow-500 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider mb-2 inline-block shadow-lg">First Partner</span>
+                    <h3 id="storyName" class="text-3xl font-black leading-tight drop-shadow-md">Ramesh Patil</h3>
+                    <p id="storyLocation" class="text-emerald-300 text-sm font-bold mt-1"><i class="fa-solid fa-location-dot"></i> Beed Village</p>
+                </div>
+            </div>
+
+            <div class="md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-gray-50/50">
+                <h4 class="text-sm font-extrabold text-emerald-500 tracking-widest uppercase mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-quote-left text-2xl text-emerald-200"></i> The Journey
+                </h4>
+                
+                <p id="storyText" class="text-gray-700 text-lg md:text-xl leading-relaxed font-medium italic border-l-4 border-emerald-400 pl-5">
+                    "Story text will appear here..."
+                </p>
+
+                <div class="mt-8 flex items-center gap-4 border-t border-gray-200 pt-6">
+                    <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl shadow-inner">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <p class="text-sm text-gray-500 font-bold">Empowered by <span class="text-gray-900">KisanCart</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🌟 THE EMOTIONAL STORIES DATABASE 🌟
+        const farmerStories = {
+            'ramesh': {
+                name: 'Ramesh Patil', location: 'Beed Village', badge: 'First Partner', badgeColor: 'bg-yellow-500', img: 'farmer1.jpg',
+                story: '"Kuch saal pehle tak, raat ke 3 baje uthkar mandi jana meri majboori thi. Wahan dalal meri fasal ki keemat aise lagate the jaise main kisan nahi, koi majdoor hoon. Kai baar toh tamatar sadak par phek kar aana padta tha kyunki tractor ka bhada bhi nahi nikalta tha. KisanCart ne sab badal diya. Aaj mujhe apni fasal ka poora aur sahi daam milta hai, wo bhi khet se bina uthe. Pichle mahine hi maine apni beti ke college ki fees apne is naye phone se bhari hai. Ab kheti majboori nahi, garv ki baat hai."'
+            },
+            'sunita': {
+                name: 'Sunita Ughle', location: 'Nashik Outskirts', badge: 'Second Partner', badgeColor: 'bg-gray-400', img: 'farmer21.jpg',
+                story: '"Ek akeli aurat jab kheti karti hai, toh log use halke mein lete hain. Main apne aamo ko bilkul organic tareeke se baccho ki tarah palti thi, lekin mandi mein mujhe chemical wale aamo ke barabar hi daam milta tha. Mujhe lagne laga tha ki kheti chhodni padegi. Phir main KisanCart se judi. Unhone mere organic aamo ki asli keemat samjhi aur direct grahak tak pahunchaya. Aaj mere aam seher ke sabse bade gharon mein jate hain, aur meri beti usi seher mein padhti hai."'
+            },
+            'ashok': {
+                name: 'Ashok Jadhav', location: 'Satara District', badge: 'Third Partner', badgeColor: 'bg-amber-600', img: 'farmer3.jpg',
+                story: '"Karza ek kisan ko andar hi andar kha jata hai. Palak aur hari sabziyon ka daam har din badalta tha. Ek din 20 rupay, toh agle din 5 rupay. Is dar mein raat ko neend nahi aati thi ki agli subah daam kya hoga. KisanCart ne aakar mere sabhi grahako ko fix kiya. Ab mujhe har mahine ek pakki income aati hai. Jis zameen ko main karze ke chakkar mein bechne wala tha, aaj usi zameen par maine 2 aur khet lease par le liye hain. Zindagi wapas mil gayi hai."'
+            }
+        };
+
+        // ==========================================
+        // 🌟 THE 40 FARMERS SMART STORY ENGINE 🌟
+        // ==========================================
+
+        // 5 Emotional Story Templates (Jo automatically change hongi)
+        const emotionalTemplates = [
+            '"Pehle mandi mein dalal mere {crop} ki keemat mitti ke bhaav lagate the. {village} se wahan tak fasal le jane ka bhada nikalna bhi mushkil tha. Karza badhta ja raha tha. Par jab se KisanCart se juda hoon, meri fasal direct grahak tak jati hai. Aaj main karza-mukt hoon aur aaram ki neend sota hoon."',
+            
+            '"{crop} aisi fasal hai jo jaldi kharab ho jati hai. Mandi ke chakkar mein aadhi fasal sad jati thi. KisanCart ki direct pickup service ne sab aasan kar diya. Ab {village} se mera {crop} seedha shehar ke bade gharon mein fresh pahunchta hai, aur mujhe apni mehnat ka poora daam milta hai."',
+            
+            '"Ek waqt tha jab lagta tha ki baccho ki padhai chhudwani padegi. {crop} ki kheti mein nuksan hi nuksan tha kyunki market mein daam fix nahi the. KisanCart ne mujhe ek fix aur samman-janak income di. Aaj {village} se mere bacche shehar ke college mein padh rahe hain."',
+            
+            '"Har mausam mein hum kisan khoon-paseena ek karte hain, par munafa hamesha bicholiye le jate the. Main apne khet mein {crop} ugata tha par pet bharna mushkil tha. KisanCart ek farishta bankar aaya. Aaj mujhe apni fasal ka khud daam tay karne ka haq mila hai."',
+            
+            '"Pehle log sochte the ki {village} ka kisan bas garib hi rahega. Par KisanCart ki wajah se maine kheti ko ek business banaya hai. Mera {crop} ab premium quality mein gina jata hai. Aaj main sirf ek kisan nahi, KisanCart ka ek proud partner hoon."'
+        ];
+
+        // Ye function 40 cards pe click karne par chalega
+        function openCommunityStory(index) {
+            // Global array se kisan ka data nikalo
+            const farmer = window.farmersArrayGlobal[index];
+            if (!farmer) return;
+
+            let safeName = farmer.name || 'Unknown Farmer';
+            let safeVillage = farmer.village || 'Maharashtra';
+            let farmerImage = farmer.img || `https://ui-avatars.com/api/?name=${safeName.replace(' ', '+')}&background=10b981&color=fff`;
+            
+            // Fasal (Crop) ka naam nikalo, agar nahi hai toh default lagao
+            let primaryCrop = "Taazi Sabzi";
+            if (farmer.inventory && farmer.inventory.length > 0) {
+                primaryCrop = farmer.inventory[0].name;
+            }
+
+            // Template chuno aur usme kisan ki details fit karo (The Magic!)
+            let template = emotionalTemplates[index % emotionalTemplates.length];
+            let personalizedStory = template
+                .replace(/{crop}/g, primaryCrop)
+                .replace(/{village}/g, safeVillage)
+                .replace(/{name}/g, safeName);
+
+            // Modal mein Data Bharo
+            document.getElementById('storyName').innerText = safeName;
+            document.getElementById('storyLocation').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${safeVillage}`;
+            
+            // Inke liye Naya Badge "Verified Partner"
+            document.getElementById('storyBadge').innerText = "Verified Partner";
+            document.getElementById('storyBadge').className = "bg-emerald-500 text-white text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider mb-2 inline-block shadow-lg";
+            
+            document.getElementById('storyImage').src = farmerImage;
+            document.getElementById('storyText').innerText = personalizedStory;
+
+            // Modal ko smooth animation ke sath kholo
+            const modal = document.getElementById('storyModal');
+            const content = document.getElementById('storyContent');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+
+        function openStory(id) {
+            const data = farmerStories[id];
+            
+            // Populate Data
+            document.getElementById('storyName').innerText = data.name;
+            document.getElementById('storyLocation').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${data.location}`;
+            document.getElementById('storyBadge').innerText = data.badge;
+            document.getElementById('storyBadge').className = `${data.badgeColor} text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider mb-2 inline-block shadow-lg`;
+            document.getElementById('storyImage').src = data.img;
+            
+            // Populate Emotional Story
+            document.getElementById('storyText').innerText = data.story;
+
+            // Show Modal with Animation
+            const modal = document.getElementById('storyModal');
+            const content = document.getElementById('storyContent');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+
+        // closeStory function waisa hi rahega
+        function closeStory() {
+            const modal = document.getElementById('storyModal');
+            const content = document.getElementById('storyContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                const grid = document.getElementById('dynamicFarmersGrid');
+                if (!grid) return; 
+                
+                let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
+                let dbFarmers = Object.values(db);
+
+                // 🌟 THE ULTIMATE DATABASE: FIXED TOP 3 + INVENTORY + UNIQUE STORIES 🌟
+                const demoFarmers = [
+                    // 👨‍🌾 1-20 MALE FARMERS (Top 3 strictly locked per your order)
+                    { name: "Ramesh Patil", village: "Beed", img: "farmer1.jpg", 
+                      inventory: [{name: "Tomatoes", price: 30, qty: 50}, {name: "Onions", price: 25, qty: 100}],
+                      story: '"Beed mein paani ki kami aur mandi ke dalalon ne humesha rulaya hai. Tamatar aur pyaaz ke daam kabhi theek nahi mile. KisanCart se judne ke baad main apna daam khud tay karta hoon. Ab ghata nahi, munafa hota hai."' },
+                    
+                    { name: "Tukaram Kadam", village: "Shirur Village", img: "farmer2.jpg", 
+                      inventory: [{name: "Organic Potato", price: 20, qty: 100}],
+                      story: '"Shirur mein aloo bohot hota hai, par jab harvest ka time aata tha, mandi mein daam itne gir jate the ki khet se nikalne ka kharcha bhi nahi milta tha. Is saal maine apni saari fasal sirf KisanCart pe bechi. Mujhe ek fix rate mila!"' },
+                    
+                    { name: "Ashok Jadhav", village: "Satara District", img: "farmer3.jpg", 
+                      inventory: [{name: "Fresh Spinach", price: 20, qty: 40}],
+                      story: '"Hari sabzi todna kitna mehnat ka kaam hai, ye sirf ek kisan janta hai. Par market mein iski keemat mitti barabar milti thi. KisanCart ne meri mehnat ki keemat samjhi. Aaj main apne khet mein 3 aur logo ko rozgar de raha hoon."' },
+                    
+                    { name: "Suresh Desai", village: "Sangli Village", img: "farmer4.jpg", 
+                      inventory: [{name: "Red Onion", price: 25, qty: 150}],
+                      story: '"Pyaaz ki kheti me risk bohot hai. Kabhi 100 rupay kilo, toh kabhi 2 rupay. Is saal maine KisanCart pe direct deal ki. Mujhe ek fix rate mila aur meri beti ki shaadi bina kisi karze ke dhoom-dhaam se hui."' },
+                    
+                    { name: "Govind Pawar", village: "Solapur Hub", img: "farmer5.jpg", 
+                      inventory: [{name: "Fresh Cabbage", price: 18, qty: 60}, {name: "Beetroot", price: 30, qty: 40}],
+                      story: '"Patta-gobhi jaldi kharab hoti hai. Mandi mein dalal isi baat ka fayda uthate the aur raat ko daam aadha kar dete the. Ab KisanCart wale subah khet se fresh sabzi uthate hain aur sham tak customer ke ghar. Koi wastage nahi!"' },
+                    
+                    { name: "Prakash Shirke", village: "Bhor Village", img: "farmer6.jpg", 
+                      inventory: [{name: "Organic Wheat", price: 35, qty: 200}],
+                      story: '"Main pichle 10 saal se chemical-free gehun uga raha hoon, par mandi mein use normal gehun ke daam pe hi kharida jata tha. KisanCart ke customers organic ki value samajhte hain. Aaj mera gehun advance mein book ho jata hai."' },
+                    
+                    { name: "Manoj Gade", village: "Baramati", img: "farmer7.jpg", 
+                      inventory: [{name: "Sugarcane", price: 10, qty: 500}],
+                      story: '"Ganne ki kheti mein sugar factory walo ka payment hamesha late aata tha. 6-6 mahine intezaar karna padta tha. KisanCart pe main fresh ganne ka juice aur raw ganne bechta hoon. Paisa sidha aur turant bank account mein aata hai."' },
+                    
+                    { name: "Santosh Bhalerao", village: "Junnar", img: "farmer8.jpg", 
+                      inventory: [{name: "Cauliflower", price: 22, qty: 50}],
+                      story: '"Phool-gobhi ki transport mein aadhi sabzi toot jati thi. Truck walo aur mandi walo ko paise dete-dete kuch nahi bachta tha. Ab transport ki tension KisanCart ki hai, meri sirf achi kheti karne ki."' },
+                    
+                    { name: "Eknath Shingare", village: "Shirur", img: "farmer9.jpg", 
+                      inventory: [{name: "Desi Tomato", price: 30, qty: 80}],
+                      story: '"Desi tamatar ka swaad alag hi hota hai, par wo jaldi gal jate hain. Pehle dar lagta tha zyada ugane mein. Ab pata hai ki KisanCart ki fast delivery se mera tamatar fresh hi customer tak pahunchega."' },
+                    
+                    { name: "Balasaheb Thorat", village: "Daund", img: "farmer10.jpg", 
+                      inventory: [{name: "Sweet Corn", price: 15, qty: 120}],
+                      story: '"Sweet corn sheharo mein bohot mehanga bikta hai, par hume uske 5 rupay bhi nahi milte the. Aaj KisanCart ke zariye main direct urban customers ko bechta hoon. Mera profit dugna ho gaya hai."' },
+                    
+                    { name: "Vithal Bhonsle", village: "Indapur", img: "farmer11.jpg", 
+                      inventory: [{name: "Watermelon", price: 12, qty: 300}],
+                      story: '"Tarbuj garmiyon ki fasal hai. Pehle khet mein aakar seth log poora khet ek sath saste mein kharid lete the. Ab main app par live inventory update karta hoon aur sahi rate par khud bechta hoon."' },
+                    
+                    { name: "Dattaram Kale", village: "Purandar", img: "farmer12.jpg", 
+                      inventory: [{name: "Fresh Figs", price: 80, qty: 30}],
+                      story: '"Purandar ke Anjeer poore Maharashtra mein famous hain. Lekin bicholiyo ne iska faida uthaya, hume nahi. KisanCart ne mere anjeer ki branding me help ki. Aaj meri income 40% badh gayi hai."' },
+                    
+                    { name: "Sharad More", village: "Velhe", img: "farmer13.jpg", 
+                      inventory: [{name: "Brown Rice", price: 55, qty: 100}],
+                      story: '"Brown rice ugane mein mehnat zyada hai. Pehle lala log isko saste mein le jate the. Aaj shehar ke health-conscious log mere direct customers hain. Mera beta ab kheti chhodkar city nahi jana chahta, wo mere sath kaam karta hai."' },
+                    
+                    { name: "Namdev Wagh", village: "Haveli", img: "farmer14.jpg", 
+                      inventory: [{name: "Lady Finger", price: 35, qty: 45}],
+                      story: '"Bhindi ki tudai mein hath chhil jate hain. Itni mehnat ke baad jab mandi mein 10 rupay kilo sunta tha, toh dil toot jata tha. KisanCart se judne ke baad, maine apni aamdani se naya drip irrigation system lagwaya hai."' },
+                    
+                    { name: "Pandurang Joshi", village: "Mulshi", img: "farmer15.jpg", 
+                      inventory: [{name: "Coriander", price: 10, qty: 50}],
+                      story: '"Dhaniya aisi cheez hai jo sookh jaye toh kachra hai. KisanCart ki badolat, aaj khet se kat-te hi sidha packing hoti hai aur 4 ghante mein delivery. Freshness ki wajah se rate acha milta hai."' },
+                    
+                    { name: "Babanrao Kulkarni", village: "Khed", img: "farmer16.jpg", 
+                      inventory: [{name: "Bottle Gourd", price: 20, qty: 70}],
+                      story: '"Lauki ki fasal badi jaldi aati hai. Roz mandi jana padta tha. Ab main sirf apne mobile par stock dalta hoon, aur gaadi aakar utha leti hai. Mera mandi jane ka daily ka 3 ghanta bach gaya hai."' },
+                    
+                    { name: "Vilas Deshmukh", village: "Ambegaon", img: "farmer17.jpg", 
+                      inventory: [{name: "Bitter Gourd", price: 40, qty: 35}],
+                      story: '"Karele ko log kadwa samajhte hain, par kisan ke liye iski kheti bhi kadwi hoti thi jab rate nahi milta tha. Aaj direct selling ki wajah se, meri zameen jo girvi rakhi thi, wo maine chuda li hai."' },
+                    
+                    { name: "Narayan Rane", village: "Maval", img: "farmer18.jpg", 
+                      inventory: [{name: "Green Peas", price: 50, qty: 40}],
+                      story: '"Green peas ka season chota hota hai. Usi mein saal bhar ka kamana hota hai. KisanCart ne mujhe advance booking ka option diya. Fasal aane se pehle hi mere matar bik chuke the!"' },
+                    
+                    { name: "Gopinath Munde", village: "Shirwal", img: "farmer19.jpg", 
+                      inventory: [{name: "Turmeric", price: 90, qty: 20}],
+                      story: '"Kachi haldi ke fayde bohot hain par market isko pehchanta nahi tha. Yahan KisanCart pe log isko as an immunity booster kharidte hain aur mujhe iska sahi mulya mil raha hai."' },
+                    
+                    { name: "Yashwant Chavan", village: "Wai", img: "farmer20.jpg", 
+                      inventory: [{name: "Strawberry", price: 150, qty: 15}],
+                      story: '"Strawberry jaldi kharab hoti hai. Cold storage ka paisa nahi tha mere paas. KisanCart ne direct farm-to-door delivery se meri sari fasal ko khaak hone se bacha liya."' },
+
+                    // 👩‍🌾 21-40 FEMALE FARMERS
+                    { name: "Sunita Ughle", village: "Nashik Outskirts", img: "farmer21.jpg", 
+                      inventory: [{name: "Export Grapes", price: 70, qty: 150}],
+                      story: '"Ek akeli aurat jab tractor chalati hai toh gaon wale taane marte the. Angoor ki kheti asaan nahi thi, aur mandi mein aadmi log saste mein nikal dete the. KisanCart ne meri quality dekhi. Aaj main gaon ki dusri aurton ko kaam de rahi hoon."' },
+                    
+                    { name: "Pooja Patil", village: "Pune District", img: "farmer22.jpg", 
+                      inventory: [{name: "Fresh Spinach", price: 15, qty: 60}],
+                      story: '"Palak ugana mera shauk tha, par mandi mein use kachre ki tarah phek diya jata tha agar dopahar tak na bike. Aaj KisanCart ke zariye log meri fresh palak ka wait karte hain. Ye samman mere liye paiso se bada hai."' },
+                    
+                    { name: "Anita Mane", village: "Ratnagiri", img: "farmer23.jpg", 
+                      inventory: [{name: "Alphonso Mango", price: 400, qty: 50}],
+                      story: '"Ratnagiri ka Hapus aam poori duniya mein jata hai, par ugane wali mujhe kabhi theek se munafa nahi hua. KisanCart ne mujhe apni khud ki pehchaan di. Ab peti par mera naam likh kar customers tak aam jata hai."' },
+                    
+                    { name: "Priya Deshmukh", village: "Nagpur", img: "farmer24.jpg", 
+                      inventory: [{name: "Sweet Oranges", price: 50, qty: 200}],
+                      story: '"Santre ki bahaar aati thi, par khushi se zyada tension hoti thi ki beche kahan? Ab phone par order aata hai. Meri fasal direct Nagpur se alag-alag sheharo ke gharon tak jati hai bina kisi tension ke."' },
+                    
+                    { name: "Kavita Shinde", village: "Jalgaon", img: "farmer25.jpg", 
+                      inventory: [{name: "Organic Banana", price: 25, qty: 300}],
+                      story: '"Jalgaon ke kele famous hain. Maine akele apne bachon ko pala aur kheti ki. Dalal mujhe aurat samajh kar thok ke bhaav mein cheat karte plain the. KisanCart ek parivar ki tarah juda, aur aaj mera haq mujhe poora milta hai."' },
+                    
+                    { name: "Lata Kadam", village: "Ahmednagar", img: "farmer26.jpg", 
+                      inventory: [{name: "Pomegranate", price: 120, qty: 80}],
+                      story: '"Anaar ki kheti mein dawaai aur paani ka bohot kharcha hai. Pehle saara paisa kheti bachaane mein lag jata tha, profit kuch nahi tha. Ab sahi rate milne se, maine pichle saal ek nayi motor pump kharidi hai khet ke liye."' },
+                    
+                    { name: "Sindhuja Pawar", village: "Beed", img: "farmer27.jpg", 
+                      inventory: [{name: "Pearl Millet", price: 30, qty: 150}],
+                      story: '"Bajra hamari paramparik fasal hai, par iska rate humesha kam rehta tha. Aaj shehar ke log ise sehat ke liye maangte hain. KisanCart ke zariye maine apni maa ki sikhayi kheti ko ek acha business bana liya hai."' },
+                    
+                    { name: "Mukta Kale", village: "Latur", img: "farmer28.jpg", 
+                      inventory: [{name: "Soybean", price: 45, qty: 250}],
+                      story: '"Sookhe ki wajah se Latur mein kheti mushkil hai. Soybean uga kar bhi karza nahi utar raha tha. KisanCart ki wajah se direct customer mila toh income badhi. Us extra paise se maine khet mein borewell karwaya hai."' },
+                    
+                    { name: "Anjali Gaikwad", village: "Osmanabad", img: "farmer29.jpg", 
+                      inventory: [{name: "Sunflower Seeds", price: 80, qty: 40}],
+                      story: '"Surajmukhi se tel nikalna humari pushtaini kheti thi. Badi companiyo ne humein barbad kar diya tha. Ab log KisanCart se mera direct organic beej aur tel kharidte hain. Meri pehchaan wapas laut aayi hai."' },
+                    
+                    { name: "Vaishali Jadhav", village: "Nanded", img: "farmer30.jpg", 
+                      inventory: [{name: "Lemon", price: 40, qty: 50}],
+                      story: '"Nimbu sasta zaroor hota hai, par iski kheti mein saalo ki mehnat hai. Mandi walo ne mujhe ek nimbu ka 50 paise bhi nahi diya kabhi. Aaj direct selling se main respect ki zindagi jee rahi hoon."' },
+                    
+                    { name: "Rohini Shirke", village: "Parbhani", img: "farmer31.jpg", 
+                      inventory: [{name: "Cotton", price: 100, qty: 500}],
+                      story: '"Kapas ki kheti vidarbha aur marathwada mein zindagi aur maut ka sawal hoti hai. KisanCart ne transparent tareeke se mera cotton sahi factory walo aur handicraft walo tak pahunchaya. Main ab safely kheti karti hoon."' },
+                    
+                    { name: "Savitri More", village: "Hingoli", img: "farmer32.jpg", 
+                      inventory: [{name: "Papaya", price: 30, qty: 90}],
+                      story: '"Papeeta ped par pake toh hi meetha hota hai, par dalal use kacha tudwa lete the. Main ab organic papeeta direct ped se tod kar KisanCart ke zariye customer tak deti hoon. Swaad aur income, dono badh gaye."' },
+                    
+                    { name: "Meena Kulkarni", village: "Jalna", img: "farmer33.jpg", 
+                      inventory: [{name: "Sweet Potato", price: 25, qty: 100}],
+                      story: '"Shakarkand sardi ki fasal hai. Pehle koi iski kadar nahi karta tha. KisanCart ne customers ko iski health benefits bataye aur aaj meri saari fasal order pehle hi book ho jati hai."' },
+                    
+                    { name: "Sujata Joshi", village: "Aurangabad", img: "farmer34.jpg", 
+                      inventory: [{name: "Guava", price: 40, qty: 75}],
+                      story: '"Amrud ke bagiche ko maine apne baccho ki tarah pala hai. Lekin toote hue amrud ko koi nahi leta. Ab direct gharo mein delivery hone se mere fruits bilkul safe aur fresh pahunchte hain."' },
+                    
+                    { name: "Radhika Apte", village: "Dhule", img: "farmer35.jpg", 
+                      inventory: [{name: "Groundnut", price: 65, qty: 120}],
+                      story: '"Mungfali ki kheti me haton me chhale pad jate hain. Uska sahi daam mujhe pichle 15 saalo me pehli baar mila jab maine use KisanCart app pe dala. Usi din maine tyohar wale kapde kharide the baccho ke liye."' },
+                    
+                    { name: "Neha Wagh", village: "Nandurbar", img: "farmer36.jpg", 
+                      inventory: [{name: "Custard Apple", price: 80, qty: 45}],
+                      story: '"Sitaphal aadiwasi ilaqo se aata hai. Yahan lala log humein sirf kuch rupay de kar lut lete the. KisanCart ne humein shehar se direct connect kiya. Aaj hamara gaon pragati kar raha hai."' },
+                    
+                    { name: "Aarti Bhalerao", village: "Washim", img: "farmer37.jpg", 
+                      inventory: [{name: "Mustard Seeds", price: 55, qty: 80}],
+                      story: '"Sarso ugana aur bechna, dono hi mardo ka kaam mana jata tha yahan. Main ek vidhwa hoon. KisanCart ne mujhe ghar baithe apna anaj bechne ka platform diya. Ab mujhe kisi aarti ke aage hath nahi phailane padte."' },
+                    
+                    { name: "Sonali Bhonsle", village: "Akola", img: "farmer38.jpg", 
+                      inventory: [{name: "Green Gram", price: 70, qty: 100}],
+                      story: '"Moong daal hum hamesha saste mein bechte the aur shehar me wo 100 rupay kilo bikti thi. Ab ye farq mujhe samajh aa gaya hai. KisanCart se main direct shehar wali keemat par bechti hoon. Munafa seedha mere bank me."' },
+                    
+                    { name: "Rekha Thorat", village: "Amravati", img: "farmer39.jpg", 
+                      inventory: [{name: "Brinjal", price: 20, qty: 60}],
+                      story: '"Baingan ugane par pehle mazak udta tha ki kya fayda, keede lag jayenge. Maine organic try kiya aur KisanCart walo ne mujhe guide kiya. Aaj mere kheto mein zero chemical use hota hai aur customers bohot khush hain."' },
+                    
+                    { name: "Madhuri Munde", village: "Wardha", img: "farmer40.jpg", 
+                      inventory: [{name: "Capsicum", price: 45, qty: 50}],
+                      story: '"Shimla mirch ki polyhouse kheti ke liye bada loan liya tha. Mandi ne toh maar hi diya tha rate gira kar. KisanCart ki wajah se meri EMIs time par ja rahi hain aur main aage badh rahi hoon."' }
+                ];
+
+                // 3. Purane aur naye farmers ko mila do
+                window.farmersArrayGlobal = [...dbFarmers, ...demoFarmers];
+                let htmlContent = '';
+                
+                window.farmersArrayGlobal.forEach((farmer, index) => {
+                    let safeName = farmer.name || 'Unknown Farmer';
+                    let safeVillage = farmer.village || 'India';
+                    let farmerImage = farmer.img || `https://ui-avatars.com/api/?name=${safeName.replace(' ', '+')}&background=10b981&color=fff`;
+
+                    // 🌟 INVENTORY WAPAS AA GAYI 🌟
+                    let inventoryData = farmer.inventory || [];
+                    let cropsHTML = '';
+
+                    if(inventoryData.length > 0) {
+                        cropsHTML = inventoryData.slice(0, 2).map(crop => {
+                            return `
+                            <div class="flex justify-between items-center bg-gray-800/50 p-2.5 rounded-lg border border-gray-700/50 mb-2 hover:bg-emerald-900/30 transition shadow-inner">
+                                <span class="text-xs text-gray-200 font-bold flex items-center gap-1.5"><i class="fa-solid fa-leaf text-emerald-500 text-[10px]"></i> ${crop.name}</span>
+                                <span class="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md">₹${crop.price} <span class="text-gray-500 opacity-70">/ ${crop.qty}kg</span></span>
+                            </div>`;
+                        }).join('');
+                    } else {
+                        cropsHTML = `<div class="bg-gray-800/30 p-3 rounded-lg border border-gray-700/30 text-center"><p class="text-xs text-gray-400 italic font-medium">🌾 Updating fresh stock...</p></div>`;
+                    }
+
+                    // Card Generator 
+                    htmlContent += `
+                    <div onclick="openCommunityStory(${index})" class="cursor-pointer bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-3xl hover:bg-white/10 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(16,185,129,0.15)] transition-all duration-400 group relative overflow-hidden flex flex-col h-full">
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/40 transition-all duration-500"></div>
+                        
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="relative">
+                                <img src="${farmerImage}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${safeName.replace(' ', '+')}&background=10b981&color=fff'" class="w-16 h-16 rounded-full object-cover border-2 border-gray-600 group-hover:border-emerald-400 transition-colors duration-300 shadow-lg">
+                                <div class="absolute -bottom-1 -right-1 bg-emerald-500 w-6 h-6 rounded-full border-2 border-gray-900 flex items-center justify-center shadow-sm">
+                                    <i class="fa-solid fa-check text-white text-[10px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-extrabold text-lg leading-tight group-hover:text-emerald-400 transition-colors">${safeName}</h4>
+                                <p class="text-gray-400 text-xs font-bold mt-1 flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-emerald-500"></i> ${safeVillage}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="relative z-10 border-t border-gray-700/50 pt-4 mt-auto">
+                            <p class="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-3">Fresh Available Stock</p>
+                            ${cropsHTML}
+                        </div>
+
+                        <div class="relative z-10 pt-4 mt-2 text-center">
+                            <button class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold px-4 py-2 rounded-lg text-xs hover:bg-emerald-500 hover:text-white transition w-full shadow-sm">
+                                <i class="fa-solid fa-book-open mr-1"></i> Read My Story
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                });
+
+                grid.innerHTML = htmlContent;
+                
+            } catch (error) {
+                console.error("Oops! Ek error aa gaya:", error);
+            }
+        });
+
+        // 🌟 NAYA FUNCTION: Har kisan ki apni original story dikhayega 🌟
+        function openCommunityStory(index) {
+            const farmer = window.farmersArrayGlobal[index];
+            if (!farmer) return;
+
+            let safeName = farmer.name || 'Unknown Farmer';
+            let safeVillage = farmer.village || 'Maharashtra';
+            let farmerImage = farmer.img || `https://ui-avatars.com/api/?name=${safeName.replace(' ', '+')}&background=10b981&color=fff`;
+            
+            // Unki apni original story (Agar na ho toh fallback)
+            let originalStory = farmer.story || `"KisanCart se judne ke baad meri kheti ka tareeka badal gaya hai. Direct selling sabse best hai."`;
+
+            // Modal mein Data Bharo
+            document.getElementById('storyName').innerText = safeName;
+            document.getElementById('storyLocation').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${safeVillage}`;
+            document.getElementById('storyBadge').innerText = "Verified Partner";
+            document.getElementById('storyBadge').className = "bg-emerald-500 text-white text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider mb-2 inline-block shadow-lg";
+            document.getElementById('storyImage').src = farmerImage;
+            document.getElementById('storyText').innerText = originalStory;
+
+            // Modal ko smooth animation ke sath kholo
+            const modal = document.getElementById('storyModal');
+            const content = document.getElementById('storyContent');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+        
+        function closeStory() {
+            const modal = document.getElementById('storyModal');
+            const content = document.getElementById('storyContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
