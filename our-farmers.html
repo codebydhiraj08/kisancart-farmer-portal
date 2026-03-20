@@ -8,6 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+        }
+        
         * { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: #f8fafc; }
         
@@ -40,7 +46,7 @@
         }
     </style>
 </head>
-<body class="text-gray-800 relative overflow-x-hidden">
+<body class="text-gray-800 relative overflow-x-hidden w-full max-w-[100vw]">
 
     <div class="blob-bg w-96 h-96 bg-emerald-300 rounded-full top-0 left-[-100px]"></div>
     <div class="blob-bg w-[500px] h-[500px] bg-yellow-100 rounded-full top-[20%] right-[-200px]"></div>
