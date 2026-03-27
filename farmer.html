@@ -319,56 +319,45 @@
             storageBucket: "kisancartdb.firebasestorage.app",
             messagingSenderId: "401851027920",
             appId: "1:401851027920:web:16d778a92e449f1413e9d5"
-            };
+        };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const cloudDB = firebase.firestore();
-        console.log("Firebase Cloud Database Connected Successfully! 🚀");
-    </script>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    <script>
-        // 🌟 PAGE LOAD LOGIC (Auto-Login) 🌟
+        // Global Variables
+        let isSignupMode = false;
+        let farmerOtpTimerInterval;
+        let currentFarmerProfile = null; // Firebase se kisan ki details save rakhne ke liye
+
+        // ==========================================
+        // 🌟 2. PAGE LOAD & AUTO LOGIN LOGIC
+        // ==========================================
         document.addEventListener("DOMContentLoaded", () => {
             const activePhone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
 
-            if (activePhone && db[activePhone]) {
-                // Agar user pehle se login hai, toh seedha dashboard dikhao (koi blink nahi hoga kyunki form pehle se 'hidden' hai)
-                showDashboard(db[activePhone]);
+            if (activePhone) {
+                loadDashboardData(activePhone); // Seedha Firebase se data layega
             } else {
-                // Agar naya user hai, tabhi form ko samne lao
                 const authSection = document.getElementById('farmerAuthSection');
                 authSection.classList.remove('hidden');
                 authSection.classList.add('flex');
             }
-        });
-        
-        // 🌟 OTP AUTO-ADVANCE & BACKSPACE LOGIC 🌟
-        document.addEventListener("DOMContentLoaded", () => {
+
+            // OTP Input Backspace Logic
             const otpInputs = document.querySelectorAll('#stage2OTP input');
-            
             otpInputs.forEach((input, index) => {
-                // Jab number type kare toh aage jaye
                 input.addEventListener('input', function() {
-                    if (this.value.length === 1 && index < otpInputs.length - 1) {
-                        otpInputs[index + 1].focus();
-                    }
+                    if (this.value.length === 1 && index < otpInputs.length - 1) otpInputs[index + 1].focus();
                 });
-                
-                // Jab Backspace dabaye toh peeche jaye
                 input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Backspace' && this.value === '' && index > 0) {
-                        otpInputs[index - 1].focus();
-                    }
+                    if (e.key === 'Backspace' && this.value === '' && index > 0) otpInputs[index - 1].focus();
                 });
             });
         });
 
-        let isSignupMode = false;
-
-        // TABS SWITCHING LOGIC
+        // ==========================================
+        // 🌟 3. AUTHENTICATION & OTP LOGIC
+        // ==========================================
         function switchAuthMode(mode) {
             const loginArea = document.getElementById('loginFormArea');
             const signupArea = document.getElementById('signupFormArea');
@@ -379,30 +368,20 @@
 
             if (mode === 'login') {
                 isSignupMode = false;
-                loginArea.classList.remove('hidden');
-                signupArea.classList.add('hidden');
-                
-                loginTab.className = "w-1/2 pb-3 font-extrabold text-emerald-600 border-b-2 border-emerald-500 transition";
-                signupTab.className = "w-1/2 pb-3 font-extrabold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition";
-                
-                title.innerText = "Welcome Back Farmer!";
-                subtitle.innerText = "Login with your mobile number to access dashboard.";
+                loginArea.classList.remove('hidden'); signupArea.classList.add('hidden');
+                loginTab.className = "w-1/2 pb-3 font-extrabold text-emerald-600 border-b-2 border-emerald-500 transition text-lg";
+                signupTab.className = "w-1/2 pb-3 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition text-lg";
+                title.innerText = "Welcome Back!"; subtitle.innerText = "Login with your mobile to access your farm dashboard.";
             } else {
                 isSignupMode = true;
-                loginArea.classList.add('hidden');
-                signupArea.classList.remove('hidden');
-                
-                signupTab.className = "w-1/2 pb-3 font-extrabold text-emerald-600 border-b-2 border-emerald-500 transition";
-                loginTab.className = "w-1/2 pb-3 font-extrabold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition";
-                
-                title.innerText = "Partner with Us";
-                subtitle.innerText = "Register to start selling directly to customers.";
+                loginArea.classList.add('hidden'); signupArea.classList.remove('hidden');
+                signupTab.className = "w-1/2 pb-3 font-extrabold text-emerald-600 border-b-2 border-emerald-500 transition text-lg";
+                loginTab.className = "w-1/2 pb-3 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition text-lg";
+                title.innerText = "Partner with Us"; subtitle.innerText = "Register to start selling directly to customers.";
             }
         }
 
-        // INITIATE OTP LOGIC (Smart DB Check & Virtual SMS)
-        function initiateOTP() {
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
+        async function initiateOTP() {
             let phoneStr = "";
 
             if (isSignupMode) {
@@ -412,77 +391,48 @@
                 const village = document.getElementById('signupVillage').value.trim();
 
                 if (!name || phone.length < 10 || !email || !village) {
-                    showToast("Please fill all details! ⚠️");
-                    return;
+                    showToast("Please fill all details! ⚠️"); return;
                 }
-                if (db[phone]) {
+
+                // Check Firebase if user exists
+                const doc = await db.collection('farmers').doc(phone).get();
+                if (doc.exists) {
                     showToast("Account already exists! Please Login. ⚠️");
-                    switchAuthMode('login');
-                    return;
+                    switchAuthMode('login'); return;
                 }
                 phoneStr = phone;
                 localStorage.setItem('tempFarmerData', JSON.stringify({ name, phone, email, village, isNewUser: true }));
-
             } else {
                 const phone = document.getElementById('loginPhone').value.trim();
+                if (phone.length < 10) { showToast("Enter a valid 10-digit number! ⚠️"); return; }
                 
-                if (phone.length < 10) {
-                    showToast("Enter a valid 10-digit number! ⚠️");
-                    return;
-                }
-                if (!db[phone]) {
+                // Check Firebase if user exists
+                const doc = await db.collection('farmers').doc(phone).get();
+                if (!doc.exists) {
                     showToast("Account not found! Please Sign Up. ⚠️");
-                    switchAuthMode('signup');
-                    return;
+                    switchAuthMode('signup'); return;
                 }
                 phoneStr = phone;
                 localStorage.setItem('tempFarmerData', JSON.stringify({ phone, isNewUser: false }));
             }
 
-            // Show OTP Screen
             document.getElementById('stage1Form').style.display = 'none';
-            document.getElementById('stage2OTP').style.display = 'block';
-            document.getElementById('stage2OTP').classList.remove('hidden');
-            showToast("OTP Sent to " + phoneStr + " 📲");
-
-            // 🌟 NAYA LOGIC: GENERATE OTP & SHOW VIRTUAL SMS 🌟
-            window.currentGeneratedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+            const stage2 = document.getElementById('stage2OTP');
+            stage2.style.display = 'block'; stage2.classList.remove('hidden');
             
-            setTimeout(() => {
-                const smsBox = document.getElementById('virtualSmsNotification');
-                if(smsBox) {
-                    document.getElementById('virtualSmsText').innerHTML = `<b>KisanCart Partner:</b> Your Farmer Portal OTP is <b class="text-emerald-600 text-lg">${window.currentGeneratedOTP}</b>. Happy Farming! 🌾`;
-                    
-                    // Drop down animation
-                    smsBox.classList.remove('-translate-y-full', 'opacity-0');
-                    smsBox.classList.add('translate-y-4', 'opacity-100');
-
-                    // Go back up after 6 seconds
-                    setTimeout(() => {
-                        smsBox.classList.remove('translate-y-4', 'opacity-100');
-                        smsBox.classList.add('-translate-y-full', 'opacity-0');
-                    }, 6000);
-                }
-            }, 1500); 
+            showToast("OTP Sent to " + phoneStr + " 📲");
+            triggerVirtualSMS();
+            startFarmerOtpTimer();
         }
 
-        // GLOBAL TIMER VARIABLE
-        let farmerOtpTimerInterval;
-
-        // HELPER FUNCTION: VIRTUAL SMS DIKHANE KE LIYE (Code clean rakhne ke liye)
         function triggerVirtualSMS() {
             window.currentGeneratedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-            
             setTimeout(() => {
                 const smsBox = document.getElementById('virtualSmsNotification');
                 if(smsBox) {
-                    document.getElementById('virtualSmsText').innerHTML = `<b>KisanCart Partner:</b> Your Farmer Portal OTP is <b class="text-emerald-600 text-lg">${window.currentGeneratedOTP}</b>. Happy Farming! 🌾`;
-                    
-                    // Drop down animation
+                    document.getElementById('virtualSmsText').innerHTML = `<b>KisanCart Partner:</b> Your OTP is <b class="text-emerald-600 text-lg">${window.currentGeneratedOTP}</b>. 🌾`;
                     smsBox.classList.remove('-translate-y-full', 'opacity-0');
                     smsBox.classList.add('translate-y-4', 'opacity-100');
-
-                    // Go back up after 6 seconds
                     setTimeout(() => {
                         smsBox.classList.remove('translate-y-4', 'opacity-100');
                         smsBox.classList.add('-translate-y-full', 'opacity-0');
@@ -491,12 +441,10 @@
             }, 1500);
         }
 
-        // TIMER LOGIC FOR RESEND OTP
         function startFarmerOtpTimer() {
             clearInterval(farmerOtpTimerInterval); 
             let timeLeft = 30; 
             const resendText = document.getElementById('resendText');
-            
             if(resendText) {
                 resendText.className = "text-sm text-gray-500 mt-4 font-medium text-center";
                 resendText.onclick = null; 
@@ -513,192 +461,39 @@
                         resendText.innerHTML = `Resend OTP`;
                         resendText.onclick = function() {
                             showToast('New OTP Sent!', '📨');
-                            triggerVirtualSMS(); // Naya OTP aur naya SMS bhejega
-                            startFarmerOtpTimer(); // Timer wapas 30s se chalu
+                            triggerVirtualSMS(); startFarmerOtpTimer();
                         };
                     }
                 }, 1000);
             }
         }
 
-        // INITIATE OTP LOGIC
-        function initiateOTP() {
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
-            let phoneStr = "";
-
-            if (isSignupMode) {
-                const name = document.getElementById('signupName').value.trim();
-                const phone = document.getElementById('signupPhone').value.trim();
-                const email = document.getElementById('signupEmail').value.trim();
-                const village = document.getElementById('signupVillage').value.trim();
-
-                if (!name || phone.length < 10 || !email || !village) {
-                    showToast("Please fill all details! ⚠️");
-                    return;
-                }
-                if (db[phone]) {
-                    showToast("Account already exists! Please Login. ⚠️");
-                    switchAuthMode('login');
-                    return;
-                }
-                phoneStr = phone;
-                localStorage.setItem('tempFarmerData', JSON.stringify({ name, phone, email, village, isNewUser: true }));
-
-            } else {
-                const phone = document.getElementById('loginPhone').value.trim();
-                
-                if (phone.length < 10) {
-                    showToast("Enter a valid 10-digit number! ⚠️");
-                    return;
-                }
-                if (!db[phone]) {
-                    showToast("Account not found! Please Sign Up. ⚠️");
-                    switchAuthMode('signup');
-                    return;
-                }
-                phoneStr = phone;
-                localStorage.setItem('tempFarmerData', JSON.stringify({ phone, isNewUser: false }));
-            }
-
-            // Show OTP Screen
-            document.getElementById('stage1Form').style.display = 'none';
-            document.getElementById('stage2OTP').style.display = 'block';
-            document.getElementById('stage2OTP').classList.remove('hidden');
-            showToast("OTP Sent to " + phoneStr + " 📲");
-
-            // 1. Naya SMS dikhao
-            triggerVirtualSMS();
-            
-            // 2. Resend Timer chalu karo
-            startFarmerOtpTimer();
-        }
-
-        // VERIFY OTP & ENTER DASHBOARD
         function verifyFarmerOTP() {
             const otpInputs = document.querySelectorAll('#stage2OTP input');
             let enteredOTP = "";
             otpInputs.forEach(input => enteredOTP += input.value);
 
             if (enteredOTP !== window.currentGeneratedOTP && enteredOTP !== "1234") {
-                showToast("Incorrect OTP! Please check the message. ❌");
-                return; 
+                showToast("Incorrect OTP! Please check the message. ❌"); return; 
             }
 
-            // Agar OTP sahi hai
-            clearInterval(farmerOtpTimerInterval); // Timer band kar do
-            
+            clearInterval(farmerOtpTimerInterval); 
             const temp = JSON.parse(localStorage.getItem('tempFarmerData'));
             if (!temp) return;
-
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
-            
-            if (temp.isNewUser) {
-                db[temp.phone] = { name: temp.name, phone: temp.phone, email: temp.email, village: temp.village, inventory: [] };
-                localStorage.setItem('kisanFarmerDB', JSON.stringify(db));
-            }
 
             localStorage.setItem('activeFarmerPhone', temp.phone);
             showToast("Verified Successfully! ✅");
             
-            setTimeout(() => {
-                document.getElementById('stage2OTP').style.display = 'none';
-                showDashboard(db[temp.phone]);
-            }, 1000);
-        }
-
-        // ==========================================
-        // 🌟 NAYA: PREMIUM DASHBOARD LOGIC 🌟
-        // ==========================================
-        
-        function showDashboard(farmerData) {
-            // Pura ka pura Login/Auth Section ek sath gayab kar do taaki koi overlap na ho
-            const authSection = document.getElementById('farmerAuthSection');
-            if(authSection) authSection.style.display = 'none';
-            
-            // Dashboard ko show karo
-            const dashboard = document.getElementById('farmerDashboard');
-            dashboard.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Peeche ka page na hile
-
-            // Data Populate karo
-            document.getElementById('dashFarmerName').innerText = farmerData.name.split(' ')[0]; // Sirf First Name
-            document.getElementById('dashEarnings').innerText = farmerData.earnings || '12,500'; // Demo earning
-            document.getElementById('dashOrders').innerText = farmerData.activeOrders || '3'; // Demo orders
-            
-            renderInventory(farmerData.inventory || []);
-        }
-
-        function renderInventory(inventory) {
-            const list = document.getElementById('inventoryList');
-            document.getElementById('dashCrops').innerText = inventory.length;
-
-            if(!inventory || inventory.length === 0) {
-                list.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full py-16 text-gray-400">
-                        <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-gray-200">
-                            <i class="fa-solid fa-seedling text-4xl opacity-50"></i>
-                        </div>
-                        <h4 class="font-bold text-gray-600 text-lg">No crops listed yet!</h4>
-                        <p class="text-sm mt-1">Add your first crop from the left panel to start selling.</p>
-                    </div>`;
-                return;
+            // Save to Firebase if new user
+            if (temp.isNewUser) {
+                db.collection('farmers').doc(temp.phone).set({
+                    name: temp.name, phone: temp.phone, email: temp.email, village: temp.village, joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => loadDashboardData(temp.phone));
+            } else {
+                loadDashboardData(temp.phone);
             }
 
-            list.innerHTML = inventory.map((crop, index) => `
-                <div class="flex justify-between items-center bg-gray-50 p-5 rounded-2xl border border-gray-100 hover:border-emerald-300 hover:bg-emerald-50/10 hover:shadow-md transition-all duration-300 group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-emerald-500 text-2xl group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
-                            <i class="fa-solid fa-leaf"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-gray-900 text-lg leading-tight group-hover:text-emerald-600 transition-colors">${crop.name}</h4>
-                            <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">Stock: <span class="text-gray-900 bg-gray-200 px-2 py-0.5 rounded ml-1">${crop.qty} kg</span></p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-2xl font-black text-emerald-600">₹${crop.price}<span class="text-xs text-gray-500 font-bold">/kg</span></p>
-                        <button onclick="removeCrop(${index})" class="text-[11px] font-black text-red-400 hover:text-white hover:bg-red-500 px-3 py-1.5 rounded-lg mt-2 transition-colors border border-red-100"><i class="fa-solid fa-trash mr-1"></i> REMOVE</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addCropToInventory() {
-            const name = document.getElementById('newCropName').value.trim();
-            const price = document.getElementById('newCropPrice').value.trim();
-            const qty = document.getElementById('newCropQty').value.trim();
-
-            if(!name || !price || !qty) {
-                showToast("Please fill all crop details!", "⚠️");
-                return;
-            }
-
-            const phone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
-            
-            if(!db[phone].inventory) db[phone].inventory = [];
-            
-            db[phone].inventory.push({ name, price: parseInt(price), qty: parseInt(qty) });
-            localStorage.setItem('kisanFarmerDB', JSON.stringify(db));
-
-            // Form Clear karo
-            document.getElementById('newCropName').value = '';
-            document.getElementById('newCropPrice').value = '';
-            document.getElementById('newCropQty').value = '';
-
-            showToast("Crop listed successfully! 🌱", "✅");
-            renderInventory(db[phone].inventory);
-        }
-
-        function removeCrop(index) {
-            const phone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
-            
-            db[phone].inventory.splice(index, 1);
-            localStorage.setItem('kisanFarmerDB', JSON.stringify(db));
-            
-            showToast("Crop removed from Live App.", "🗑️");
-            renderInventory(db[phone].inventory);
+            setTimeout(() => { document.getElementById('stage2OTP').style.display = 'none'; }, 1000);
         }
 
         function logoutFarmer() {
@@ -706,48 +501,78 @@
             window.location.reload();
         }
 
-        // 4. ADD PRODUCE TO INVENTORY
-        function addProduce() {
-            const name = document.getElementById('produceName').value;
-            const qty = document.getElementById('produceQty').value;
-            const price = document.getElementById('producePrice').value;
-
-            if(!qty || !price) {
-                showToast("Enter Quantity and Price! ⚠️");
-                return;
-            }
-
-            const phone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB'));
+        // ==========================================
+        // 🌟 4. DASHBOARD & FIREBASE REAL-TIME DATA
+        // ==========================================
+        function loadDashboardData(phone) {
+            const authSection = document.getElementById('farmerAuthSection');
+            if(authSection) authSection.style.display = 'none';
             
-            const newItem = {
-                id: "ITM-" + Math.floor(Math.random() * 9000),
-                name: name,
-                qty: parseFloat(qty),
-                price: parseFloat(price),
-                dateAdded: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-            };
+            const dashboard = document.getElementById('farmerDashboard');
+            dashboard.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; 
 
-            db[phone].inventory.unshift(newItem);
-            localStorage.setItem('kisanFarmerDB', JSON.stringify(db));
+            // Get Profile Info
+            db.collection('farmers').doc(phone).get().then((doc) => {
+                if (doc.exists) {
+                    currentFarmerProfile = doc.data();
+                    document.getElementById('dashFarmerName').innerText = currentFarmerProfile.name.split(' ')[0];
+                    document.getElementById('displayFarmerName').innerText = currentFarmerProfile.name;
+                    document.getElementById('displayFarmerVillage').innerText = currentFarmerProfile.village;
+                }
+            });
 
-            document.getElementById('produceQty').value = "";
-            document.getElementById('producePrice').value = "";
+            // Live Inventory Listener (Products Collection)
+            db.collection('products').where("farmerPhone", "==", phone).onSnapshot((snapshot) => {
+                let inventoryData = [];
+                let totalStock = 0;
+                
+                snapshot.forEach((doc) => {
+                    let item = doc.data();
+                    item.id = doc.id; // Save Firebase Unique ID
+                    inventoryData.push(item);
+                    totalStock += item.stock; 
+                });
 
-            showToast(`${name} added to listing! 🌾`);
-            renderInventory();
+                document.getElementById('totalStockView').innerHTML = `${totalStock} <span class="text-xl text-emerald-400">Kg</span>`;
+                document.getElementById('dashCrops').innerText = inventoryData.length;
+                document.getElementById('dashEarnings').innerText = (totalStock * 15); // Dummy calculation logic
+                
+                renderInventory(inventoryData);
+            });
         }
 
-        // 5. RENDER INVENTORY
-        function renderInventory() {
-            const phone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB'));
-            const inventory = db[phone].inventory;
-            const listContainer = document.getElementById('inventoryList');
+        function addCropToInventory() {
+            const name = document.getElementById('newCropName').value.trim();
+            const price = document.getElementById('newCropPrice').value.trim();
+            const qty = document.getElementById('newCropQty').value.trim();
 
-            // ... (inside renderInventory function)
-        
-            // Count update
+            if(!name || !price || !qty) { showToast("Please fill all crop details!", "⚠️"); return; }
+            if(!currentFarmerProfile) { showToast("Profile loading, please wait...", "⏳"); return; }
+
+            const phone = localStorage.getItem('activeFarmerPhone');
+            
+            // Add to Firebase "products" collection
+            db.collection('products').add({
+                farmerPhone: phone,
+                farmerName: currentFarmerProfile.name,
+                village: currentFarmerProfile.village,
+                name: name,
+                price: Number(price),
+                stock: Number(qty), // 'stock' use kar rahe hain taaki our farmers page se match ho
+                qty: Number(qty),
+                dateAdded: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('newCropName').value = '';
+                document.getElementById('newCropPrice').value = '';
+                document.getElementById('newCropQty').value = '';
+                showToast("Crop listed successfully on Live App! 🌱", "✅");
+            }).catch(err => console.error(err));
+        }
+
+        function renderInventory(inventory) {
+            const listContainer = document.getElementById('inventoryList');
             document.getElementById('listingCountBadge').innerText = `${inventory.length} Items`;
 
             if(inventory.length === 0) {
@@ -760,9 +585,9 @@
                 return;
             }
 
-            // List Render (Enhanced Hover Effects)
-            listContainer.innerHTML = inventory.map((item, index) => `
-                <div class="flex justify-between items-center bg-white p-5 rounded-2xl border border-gray-100 hover:border-emerald-400 hover:shadow-[0_10px_25px_rgba(16,185,129,0.15)] transition-all duration-300 transform hover:-translate-y-1 group">
+            // Note the removeCrop('${item.id}') to delete by Firebase Document ID
+            listContainer.innerHTML = inventory.map((item) => `
+                <div class="flex justify-between items-center bg-white p-5 rounded-2xl border border-gray-100 hover:border-emerald-400 hover:shadow-[0_10px_25px_rgba(16,185,129,0.15)] transition-all duration-300 transform hover:-translate-y-1 group mb-3">
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 text-emerald-600 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-300">
                             <i class="fa-solid fa-seedling"></i>
@@ -773,33 +598,25 @@
                         </div>
                     </div>
                     <div class="text-right flex-1 pr-6">
-                        <p class="font-black text-gray-900 text-xl">${item.qty} <span class="text-sm font-bold text-gray-500">Kg</span></p>
+                        <p class="font-black text-gray-900 text-xl">${item.stock} <span class="text-sm font-bold text-gray-500">Kg</span></p>
                         <p class="text-sm text-emerald-600 font-extrabold">₹${item.price} <span class="text-xs text-gray-400">/ unit</span></p>
                     </div>
-                    <button onclick="deleteItem(${index})" class="w-12 h-12 bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 hover:shadow-inner rounded-full transition-all flex items-center justify-center group/btn">
+                    <button onclick="removeCrop('${item.id}')" class="w-12 h-12 bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 hover:shadow-inner rounded-full transition-all flex items-center justify-center group/btn">
                         <i class="fa-solid fa-trash group-hover/btn:animate-bounce"></i>
                     </button>
                 </div>
             `).join('');
         }
 
-        // 6. DELETE ITEM
-        function deleteItem(index) {
-            const phone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB'));
-            db[phone].inventory.splice(index, 1);
-            localStorage.setItem('kisanFarmerDB', JSON.stringify(db));
-            renderInventory();
-            showToast("Item removed from listing. 🗑️");
+        function removeCrop(docId) {
+            db.collection('products').doc(docId).delete().then(() => {
+                showToast("Crop removed from Live App. 🗑️");
+            });
         }
 
-        // 7. LOGOUT
-        function farmerLogout() {
-            localStorage.removeItem('activeFarmerPhone');
-            window.location.reload();
-        }
-
-        // TOAST NOTIFICATION
+        // ==========================================
+        // 🌟 5. UTILITIES (Toast & Profiles)
+        // ==========================================
         function showToast(msg) {
             const toast = document.getElementById('farmerToast');
             document.getElementById('toastMsg').innerText = msg;
@@ -807,70 +624,11 @@
             setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
         }
 
-        // 🌟 FARMER PROFILE LOGIC 🌟
         function openFarmerProfile() {
-            const phone = localStorage.getItem('activeFarmerPhone');
-            if(!phone) return;
-            
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
-            const farmerData = db[phone];
-
-            // Modal mein data bharo
-            document.getElementById('modalFarmerNameDisplay').innerText = farmerData.name;
-            document.getElementById('editFarmerPhone').value = "+91 " + farmerData.phone;
-            document.getElementById('editFarmerName').value = farmerData.name;
-            document.getElementById('editFarmerEmail').value = farmerData.email || "";
-            document.getElementById('editFarmerVillage').value = farmerData.village;
-
-            // Modal dikhao with Animation
-            const modal = document.getElementById('farmerProfileModal');
-            const content = document.getElementById('profileModalContent');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 50);
+            // Placeholder: Aap chahein toh HTML me profile modal add kar sakte hain
+            showToast("Profile Settings coming soon!");
         }
-
-        function closeFarmerProfile() {
-            const modal = document.getElementById('farmerProfileModal');
-            const content = document.getElementById('profileModalContent');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 300);
-        }
-
-        function saveFarmerProfile() {
-            const phone = localStorage.getItem('activeFarmerPhone');
-            let db = JSON.parse(localStorage.getItem('kisanFarmerDB')) || {};
-            
-            const newName = document.getElementById('editFarmerName').value.trim();
-            const newEmail = document.getElementById('editFarmerEmail').value.trim();
-            const newVillage = document.getElementById('editFarmerVillage').value.trim();
-
-            if(!newName || !newVillage) {
-                showToast("Name and Village cannot be empty! ⚠️");
-                return;
-            }
-
-            // DB Update karo
-            db[phone].name = newName;
-            db[phone].email = newEmail;
-            db[phone].village = newVillage;
-            localStorage.setItem('kisanFarmerDB', JSON.stringify(db));
-
-            // Dashboard ka data bhi wahi update kar do
-            document.getElementById('displayFarmerName').innerText = newName;
-            document.getElementById('displayFarmerVillage').innerText = newVillage;
-
-            closeFarmerProfile();
-            showToast("Profile Updated Successfully! 🏆");
-        }
-    </script>
+</script>
 
     <div id="farmerDashboard" class="hidden fixed inset-0 z-[1000] bg-gray-50 flex flex-col h-screen w-screen overflow-hidden">
         
