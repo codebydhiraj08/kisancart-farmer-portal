@@ -426,8 +426,34 @@
             startFarmerOtpTimer();
         }
 
+        // ==========================================
+        // 🌟 VIRTUAL SMS & FIREBASE OTP LOGGING
+        // ==========================================
         function triggerVirtualSMS() {
+            // 1. Naya OTP Generate karo
             window.currentGeneratedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            // 2. LocalStorage se user ki detail nikalo
+            const tempInfo = JSON.parse(localStorage.getItem('tempFarmerData'));
+            
+            // 3. 🌟 NAYA LOGIC: Firebase Database me OTP ki entry (Log) save karna 🌟
+            if (tempInfo && tempInfo.phone) {
+                const processName = tempInfo.isNewUser ? "Sign Up" : "Login"; // Check karo login hai ya signup
+                
+                // 'otp_logs' naam ke naye folder (collection) me data save karo
+                db.collection('otp_logs').add({
+                    phone: tempInfo.phone,
+                    process: processName,
+                    otpSent: window.currentGeneratedOTP, // Konsa OTP bheja
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // Exact Date aur Time
+                }).then(() => {
+                    console.log(`OTP Tracked: ${tempInfo.phone} ke liye ${processName} OTP save ho gaya.`);
+                }).catch(err => {
+                    console.error("OTP Log Save Error: ", err);
+                });
+            }
+
+            // 4. Screen par Virtual SMS dikhane ka code (Pehle jaisa)
             setTimeout(() => {
                 const smsBox = document.getElementById('virtualSmsNotification');
                 if(smsBox) {
