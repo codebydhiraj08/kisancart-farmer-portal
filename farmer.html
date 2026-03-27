@@ -311,8 +311,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // 👇 APNA ASLI FIREBASE CONFIG BOX YAHAN PASTE KARNA 👇
-        const firebaseConfig = {
+        // ==========================================
+        // 🌟 1. FIREBASE SETUP (Apni Keys Yahan Daalein)
+        // ==========================================
+         const firebaseConfig = {
             apiKey: "AIzaSyB_x0Rq8BQWABLEvaIjzPm-swdZtOvIng0",
             authDomain: "kisancartdb.firebaseapp.com",
             projectId: "kisancartdb",
@@ -320,14 +322,13 @@
             messagingSenderId: "401851027920",
             appId: "1:401851027920:web:16d778a92e449f1413e9d5"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // Global Variables
         let isSignupMode = false;
         let farmerOtpTimerInterval;
-        let currentFarmerProfile = null; // Firebase se kisan ki details save rakhne ke liye
+        let currentFarmerData = null; // Kisan ka poora data (aur uski sabjiyan) yahan hold karenge
 
         // ==========================================
         // 🌟 2. PAGE LOAD & AUTO LOGIN LOGIC
@@ -336,7 +337,7 @@
             const activePhone = localStorage.getItem('activeFarmerPhone');
 
             if (activePhone) {
-                loadDashboardData(activePhone); // Seedha Firebase se data layega
+                loadDashboardData(activePhone); 
             } else {
                 const authSection = document.getElementById('farmerAuthSection');
                 authSection.classList.remove('hidden');
@@ -484,10 +485,15 @@
             localStorage.setItem('activeFarmerPhone', temp.phone);
             showToast("Verified Successfully! ✅");
             
-            // Save to Firebase if new user
+            // 🌟 NAYA LOGIC: Signup pe empty inventory array create hoga
             if (temp.isNewUser) {
                 db.collection('farmers').doc(temp.phone).set({
-                    name: temp.name, phone: temp.phone, email: temp.email, village: temp.village, joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    name: temp.name, 
+                    phone: temp.phone, 
+                    email: temp.email, 
+                    village: temp.village, 
+                    inventory: [], // Khali dabba sabjiyo ke liye
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => loadDashboardData(temp.phone));
             } else {
                 loadDashboardData(temp.phone);
@@ -502,7 +508,7 @@
         }
 
         // ==========================================
-        // 🌟 4. DASHBOARD & FIREBASE REAL-TIME DATA
+        // 🌟 4. DASHBOARD & FIREBASE REAL-TIME DATA (SINGLE COLLECTION LOGIC)
         // ==========================================
         function loadDashboardData(phone) {
             const authSection = document.getElementById('farmerAuthSection');
@@ -512,33 +518,28 @@
             dashboard.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; 
 
-            // Get Profile Info
-            db.collection('farmers').doc(phone).get().then((doc) => {
+            // 🌟 Sirf 1 Jagah se Real-time data lena hai 🌟
+            db.collection('farmers').doc(phone).onSnapshot((doc) => {
                 if (doc.exists) {
-                    currentFarmerProfile = doc.data();
-                    document.getElementById('dashFarmerName').innerText = currentFarmerProfile.name.split(' ')[0];
-                    document.getElementById('displayFarmerName').innerText = currentFarmerProfile.name;
-                    document.getElementById('displayFarmerVillage').innerText = currentFarmerProfile.village;
+                    currentFarmerData = doc.data(); // Poora data yahan save ho gaya
+                    
+                    // UI Update karo
+                    document.getElementById('dashFarmerName').innerText = currentFarmerData.name.split(' ')[0];
+                    document.getElementById('displayFarmerName').innerText = currentFarmerData.name;
+                    document.getElementById('displayFarmerVillage').innerText = currentFarmerData.village;
+
+                    // Inventory aur stock calculate karo
+                    let inventoryArr = currentFarmerData.inventory || [];
+                    let totalStock = 0;
+                    
+                    inventoryArr.forEach(item => totalStock += item.stock);
+
+                    document.getElementById('totalStockView').innerHTML = `${totalStock} <span class="text-xl text-emerald-400">Kg</span>`;
+                    document.getElementById('dashCrops').innerText = inventoryArr.length;
+                    document.getElementById('dashEarnings').innerText = (totalStock * 15); // Dummy calculation
+                    
+                    renderInventory(inventoryArr);
                 }
-            });
-
-            // Live Inventory Listener (Products Collection)
-            db.collection('products').where("farmerPhone", "==", phone).onSnapshot((snapshot) => {
-                let inventoryData = [];
-                let totalStock = 0;
-                
-                snapshot.forEach((doc) => {
-                    let item = doc.data();
-                    item.id = doc.id; // Save Firebase Unique ID
-                    inventoryData.push(item);
-                    totalStock += item.stock; 
-                });
-
-                document.getElementById('totalStockView').innerHTML = `${totalStock} <span class="text-xl text-emerald-400">Kg</span>`;
-                document.getElementById('dashCrops').innerText = inventoryData.length;
-                document.getElementById('dashEarnings').innerText = (totalStock * 15); // Dummy calculation logic
-                
-                renderInventory(inventoryData);
             });
         }
 
@@ -548,27 +549,29 @@
             const qty = document.getElementById('newCropQty').value.trim();
 
             if(!name || !price || !qty) { showToast("Please fill all crop details!", "⚠️"); return; }
-            if(!currentFarmerProfile) { showToast("Profile loading, please wait...", "⏳"); return; }
+            if(!currentFarmerData) { showToast("Loading, please wait...", "⏳"); return; }
 
             const phone = localStorage.getItem('activeFarmerPhone');
             
-            // Add to Firebase "products" collection
-            db.collection('products').add({
-                farmerPhone: phone,
-                farmerName: currentFarmerProfile.name,
-                village: currentFarmerProfile.village,
+            // Nayi Sabji ka object banana (Sath me unique ID dalna taaki delete kar sakein)
+            const newCropItem = {
+                id: "ITM-" + Date.now(), // Date.now() se ekdum unique ID banti hai
                 name: name,
                 price: Number(price),
-                stock: Number(qty), // 'stock' use kar rahe hain taaki our farmers page se match ho
+                stock: Number(qty), 
                 qty: Number(qty),
-                dateAdded: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                dateAdded: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+            };
+
+            // 🌟 FIREBASE MAGIC: Array ke andar data daalna (arrayUnion) 🌟
+            db.collection('farmers').doc(phone).update({
+                inventory: firebase.firestore.FieldValue.arrayUnion(newCropItem)
             }).then(() => {
                 document.getElementById('newCropName').value = '';
                 document.getElementById('newCropPrice').value = '';
                 document.getElementById('newCropQty').value = '';
-                showToast("Crop listed successfully on Live App! 🌱", "✅");
-            }).catch(err => console.error(err));
+                showToast("Crop listed successfully! 🌱", "✅");
+            }).catch(err => console.error("Error adding crop:", err));
         }
 
         function renderInventory(inventory) {
@@ -585,7 +588,6 @@
                 return;
             }
 
-            // Note the removeCrop('${item.id}') to delete by Firebase Document ID
             listContainer.innerHTML = inventory.map((item) => `
                 <div class="flex justify-between items-center bg-white p-5 rounded-2xl border border-gray-100 hover:border-emerald-400 hover:shadow-[0_10px_25px_rgba(16,185,129,0.15)] transition-all duration-300 transform hover:-translate-y-1 group mb-3">
                     <div class="flex items-center gap-4">
@@ -608,25 +610,28 @@
             `).join('');
         }
 
-        function removeCrop(docId) {
-            db.collection('products').doc(docId).delete().then(() => {
+        function removeCrop(itemId) {
+            const phone = localStorage.getItem('activeFarmerPhone');
+            if(!currentFarmerData) return;
+
+            // 🌟 NAYA LOGIC: Array se specific ID wali sabji nikal kar wapas update karna
+            const updatedInventory = currentFarmerData.inventory.filter(item => item.id !== itemId);
+            
+            db.collection('farmers').doc(phone).update({
+                inventory: updatedInventory
+            }).then(() => {
                 showToast("Crop removed from Live App. 🗑️");
             });
         }
 
         // ==========================================
-        // 🌟 5. UTILITIES (Toast & Profiles)
+        // 🌟 5. UTILITIES (Toast)
         // ==========================================
         function showToast(msg) {
             const toast = document.getElementById('farmerToast');
             document.getElementById('toastMsg').innerText = msg;
             toast.classList.remove('translate-y-24', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
-        }
-
-        function openFarmerProfile() {
-            // Placeholder: Aap chahein toh HTML me profile modal add kar sakte hain
-            showToast("Profile Settings coming soon!");
         }
 </script>
 
