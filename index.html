@@ -14,13 +14,6 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
-        /* 🌟 MASTER MOBILE LAYOUT FIX 🌟 */
-        html, body {
-            overflow-x: hidden !important;
-            width: 100% !important;
-            max-width: 100vw !important;
-        }
-        
         /* General Setup */
         * { 
             margin: 0; 
@@ -681,7 +674,7 @@
     .neon-glow-text { text-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.4); }
     </style>
 </head>
-<body class="bg-gray-50 overflow-x-hidden w-full">
+<body class="bg-gray-50">
     <div id="virtualSmsNotification" class="fixed top-0 left-1/2 transform -translate-x-1/2 -translate-y-full opacity-0 transition-all duration-500 z-[999] w-[90%] max-w-sm mt-2 cursor-pointer shadow-2xl rounded-2xl overflow-hidden flex border border-gray-200 bg-white/90 backdrop-blur-xl">
         <div class="w-12 flex-shrink-0 bg-emerald-500 flex items-center justify-center text-white text-xl">
             <i class="fa-solid fa-message"></i>
@@ -721,7 +714,7 @@
                         <a href="#products" class="text-gray-300 font-medium hover:text-emerald-400 transition">Shop</a>
                         <a href="#contact" class="text-gray-300 font-medium hover:text-emerald-400 transition">Contact</a>
                     </div>
-    
+
                     <div class="relative z-50 hidden lg:block" data-aos="fade-down" data-aos-delay="150">
                         <div class="flex items-center bg-gray-800/60 rounded-full border border-gray-600/50 px-4 py-2 backdrop-blur-sm focus-within:border-emerald-400 transition-all shadow-inner w-60">
                             <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
@@ -729,7 +722,7 @@
                         </div>
                         <div id="searchResultsDropdown" class="absolute top-full right-0 w-72 mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 hidden max-h-80 overflow-y-auto z-[100]"></div>
                     </div>
-    
+
                     <div class="flex items-center gap-4" data-aos="fade-down" data-aos-delay="200">
                         <div class="relative group">
                             <button class="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:text-emerald-400 border border-gray-600 hover:border-emerald-400 transition shadow-sm">
@@ -741,7 +734,7 @@
                                 <button onclick="changeGTranslate('mr')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-600">मराठी</button>
                             </div>
                         </div>
-    
+
                         <button onclick="openCart()" class="text-gray-300 hover:text-emerald-400 text-xl transition relative cursor-pointer">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span id="navCartCount" class="hidden absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">0</span>
@@ -762,15 +755,15 @@
                                 </div>
                             </div>
                         </div>
-    
+
                         <button onclick="toggleMobileMenu()" class="xl:hidden w-10 h-10 ml-2 flex items-center justify-center text-gray-300 hover:text-emerald-400 text-2xl transition focus:outline-none">
                             <i class="fa-solid fa-bars"></i>
                         </button>
-    
+
                     </div>
                 </div>
             </div>
-    
+
             <div id="mobileMenuPanel" class="hidden xl:hidden bg-gray-900/95 backdrop-blur-md border-t border-gray-800 shadow-xl w-full absolute top-full left-0">
                 <div class="px-4 py-3 flex flex-col space-y-2">
                     <a href="#home" onclick="toggleMobileMenu()" class="px-4 py-3 text-emerald-400 font-bold bg-emerald-500/10 rounded-xl">Home</a>
@@ -2745,10 +2738,15 @@
             }
         }
 
-        // 🌟 1. NAYA: CHECKOUT SE DATA CLOUD PE BHEJNA 🌟
         function process3DPayment() {
             const formSec = document.getElementById('paymentFormSection');
             const processSec = document.getElementById('paymentProcessing3D');
+            
+            let paymentMethodText = "Cash on Delivery";
+            const selectedLabel = document.querySelector('.payment-method-label.border-emerald-500');
+            if(selectedLabel) {
+                paymentMethodText = selectedLabel.innerText.trim();
+            }
             
             formSec.style.transform = 'rotateY(90deg) scale(0.9)';
             formSec.style.opacity = '0';
@@ -2779,17 +2777,34 @@
                         total: currentTotal,
                         isDelivered: false,  
                         farmer: randomFarmer,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Live order time
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp() 
                     };
                     
-                    // 🚀 FIREBASE CLOUD ME ORDER SAVE KARENGE
                     const activePhone = localStorage.getItem('activeUserPhone');
+                    const custName = document.getElementById('checkoutCustName').value.trim();
+
                     if(activePhone) {
                         try {
-                            // User ke andar 'orders' naam ka folder banayega
+                            // 1. User ke andar 'orders' folder me order save karo
                             await cloudDB.collection('users').doc(activePhone).collection('orders').doc(newOrder.id).set(newOrder);
+
+                            // 🚀 2. TRANSACTIONS DATABASE ME KYA KHARIDA WO BHI BHEJO
+                            await cloudDB.collection('transactions').add({
+                                farmerName: randomFarmer.name,
+                                farmerPhone: "9876543210", 
+                                customerName: custName,
+                                customerPhone: activePhone,
+                                amount: currentTotal,
+                                paymentMethod: paymentMethodText,
+                                status: "Success - Credited to Farmer Bank A/C",
+                                orderId: newOrder.id,
+                                purchasedItems: newOrder.items, // <--- YAHAN ITEMS BHI BHEJ DIYE HAIN 🍅🧅
+                                date: dateString,
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+
                         } catch (err) {
-                            console.log("Order Save Error: ", err);
+                            console.log("Database Save Error: ", err);
                         }
                     }
 
@@ -2802,7 +2817,7 @@
 
                     document.getElementById('orderSuccessModal').classList.remove('hidden');
                     document.getElementById('orderSuccessModal').classList.add('flex');
-                    showToast("Your order is on the way! 🚚", "🎉");
+                    showToast(`Payment via ${paymentMethodText} Successful! 🚚`, "🎉");
                     
                     document.getElementById('successOrderId').innerText = `Order ID: ${orderIdGen}`;
                     
@@ -2816,7 +2831,7 @@
                 }, 3000); 
             }, 300); 
         }
-
+        
         // Order Success hone ke baad popup band karna (Bina page refresh kiye)
         function continueShopping() {
             document.getElementById('orderSuccessModal').classList.add('hidden');
@@ -3599,6 +3614,7 @@
             }
         }
     </script>
+
     <script>
         // Ye function mobile menu ko kholne aur band karne ka kaam karega
         function toggleMobileMenu() {
@@ -3606,5 +3622,6 @@
             menu.classList.toggle('hidden');
         }
     </script>
+
 </body>
 </html>
