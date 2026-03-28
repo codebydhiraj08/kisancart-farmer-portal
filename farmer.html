@@ -382,78 +382,28 @@
             }
         }
 
-        async function initiateOTP() {
-            let phoneStr = "";
-
-            if (isSignupMode) {
-                const name = document.getElementById('signupName').value.trim();
-                const phone = document.getElementById('signupPhone').value.trim();
-                const email = document.getElementById('signupEmail').value.trim();
-                const village = document.getElementById('signupVillage').value.trim();
-
-                if (!name || phone.length < 10 || !email || !village) {
-                    showToast("Please fill all details! ⚠️"); return;
-                }
-
-                // Check Firebase if user exists
-                const doc = await db.collection('farmers').doc(phone).get();
-                if (doc.exists) {
-                    showToast("Account already exists! Please Login. ⚠️");
-                    switchAuthMode('login'); return;
-                }
-                phoneStr = phone;
-                localStorage.setItem('tempFarmerData', JSON.stringify({ name, phone, email, village, isNewUser: true }));
-            } else {
-                const phone = document.getElementById('loginPhone').value.trim();
-                if (phone.length < 10) { showToast("Enter a valid 10-digit number! ⚠️"); return; }
-                
-                // Check Firebase if user exists
-                const doc = await db.collection('farmers').doc(phone).get();
-                if (!doc.exists) {
-                    showToast("Account not found! Please Sign Up. ⚠️");
-                    switchAuthMode('signup'); return;
-                }
-                phoneStr = phone;
-                localStorage.setItem('tempFarmerData', JSON.stringify({ phone, isNewUser: false }));
-            }
-
-            document.getElementById('stage1Form').style.display = 'none';
-            const stage2 = document.getElementById('stage2OTP');
-            stage2.style.display = 'block'; stage2.classList.remove('hidden');
-            
-            showToast("OTP Sent to " + phoneStr + " 📲");
-            triggerVirtualSMS();
-            startFarmerOtpTimer();
-        }
-
         // ==========================================
-        // 🌟 VIRTUAL SMS & FIREBASE OTP LOGGING
+        // 🌟 MASTER OTP ENGINE (Generate + DB Log + SMS)
         // ==========================================
-        function triggerVirtualSMS() {
-            // 1. Naya OTP Generate karo
+        function generateAndLogOTP(farmerName, phone, processName) {
+            // 1. Naya OTP aur Time nikalo
             window.currentGeneratedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-            
-            // 2. LocalStorage se user ki detail nikalo
-            const tempInfo = JSON.parse(localStorage.getItem('tempFarmerData'));
-            
-            // 3. 🌟 NAYA LOGIC: Firebase Database me OTP ki entry (Log) save karna 🌟
-            if (tempInfo && tempInfo.phone) {
-                const processName = tempInfo.isNewUser ? "Sign Up" : "Login"; // Check karo login hai ya signup
-                
-                // 'otp_logs' naam ke naye folder (collection) me data save karo
-                db.collection('otp_logs').add({
-                    phone: tempInfo.phone,
-                    process: processName,
-                    otpSent: window.currentGeneratedOTP, // Konsa OTP bheja
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // Exact Date aur Time
-                }).then(() => {
-                    console.log(`OTP Tracked: ${tempInfo.phone} ke liye ${processName} OTP save ho gaya.`);
-                }).catch(err => {
-                    console.error("OTP Log Save Error: ", err);
-                });
-            }
+            const exactTime = new Date().toLocaleString('en-IN'); 
 
-            // 4. Screen par Virtual SMS dikhane ka code (Pehle jaisa)
+            // 2. Firebase me direct entry (100% Guarantee Name aayega)
+            db.collection('otp_logs').add({
+                Name: farmerName,    
+                Phone: phone,
+                Process: processName,
+                OTP: window.currentGeneratedOTP,
+                Time: exactTime
+            }).then(() => {
+                console.log("✅ Name ke sath OTP DB me chala gaya: ", farmerName);
+            }).catch((e) => {
+                console.error("❌ DB Error: ", e);
+            });
+
+            // 3. Screen par SMS dikhana
             setTimeout(() => {
                 const smsBox = document.getElementById('virtualSmsNotification');
                 if(smsBox) {
@@ -468,10 +418,110 @@
             }, 1500);
         }
 
-        function startFarmerOtpTimer() {
+        // ==========================================
+        // 🌟 MASTER AUTH & OTP LOGIC (100% BULLETPROOF)
+        // ==========================================
+
+        async function initiateOTP() {
+            try {
+                let phone = "";
+                let farmerName = "Unknown";
+                let processType = "";
+
+                // 1. SIGNUP MODE CHECK
+                if (isSignupMode) {
+                    farmerName = document.getElementById('signupName').value.trim();
+                    phone = document.getElementById('signupPhone').value.trim();
+                    const email = document.getElementById('signupEmail').value.trim();
+                    const village = document.getElementById('signupVillage').value.trim();
+
+                    if (!farmerName || phone.length < 10 || !email || !village) {
+                        showToast("Please fill all details! ⚠️"); return;
+                    }
+
+                    const doc = await db.collection('farmers').doc(phone).get();
+                    if (doc.exists) {
+                        showToast("Account already exists! Please Login. ⚠️");
+                        switchAuthMode('login'); return;
+                    }
+                    
+                    processType = "Sign Up";
+                    // Data aage verifyFarmerOTP ke liye save kar rahe hain
+                    localStorage.setItem('tempFarmerData', JSON.stringify({ name: farmerName, phone: phone, email: email, village: village, isNewUser: true }));
+
+                } 
+                // 2. LOGIN MODE CHECK
+                else {
+                    phone = document.getElementById('loginPhone').value.trim();
+                    if (phone.length < 10) { showToast("Enter a valid 10-digit number! ⚠️"); return; }
+                    
+                    const doc = await db.collection('farmers').doc(phone).get();
+                    if (!doc.exists) {
+                        showToast("Account not found! Please Sign Up. ⚠️");
+                        switchAuthMode('signup'); return;
+                    }
+
+                    // 🌟 FIREBASE SE DIRECT NAAM NIKALA 🌟
+                    farmerName = doc.data().name || "Farmer (Name Not Found)";
+                    processType = "Login";
+                    
+                    // Data aage verifyFarmerOTP ke liye save kar rahe hain
+                    localStorage.setItem('tempFarmerData', JSON.stringify({ name: farmerName, phone: phone, isNewUser: false }));
+                }
+
+                // 3. OTP GENERATE KARO
+                window.currentGeneratedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+                const exactTime = new Date().toLocaleString('en-IN');
+
+                // 4. FIREBASE ME LOG SAVE KARO (Guarantee ke sath Name jayega)
+                await db.collection('otp_logs').add({
+                    Name: farmerName,    
+                    Phone: phone,
+                    Process: processType,
+                    OTP: window.currentGeneratedOTP,
+                    Time: exactTime
+                });
+                console.log("✅ FireBase me OTP Log Save ho gaya! Name:", farmerName);
+
+                // 5. SCREEN PAR CHANGES KARO
+                document.getElementById('stage1Form').style.display = 'none';
+                const stage2 = document.getElementById('stage2OTP');
+                stage2.style.display = 'block'; 
+                stage2.classList.remove('hidden');
+                
+                showToast("OTP Sent to " + phone + " 📲");
+                
+                // 6. VIRTUAL SMS DIKHAO
+                setTimeout(() => {
+                    const smsBox = document.getElementById('virtualSmsNotification');
+                    if(smsBox) {
+                        document.getElementById('virtualSmsText').innerHTML = `<b>KisanCart Partner:</b> Your OTP is <b class="text-emerald-600 text-lg">${window.currentGeneratedOTP}</b>. 🌾`;
+                        smsBox.classList.remove('-translate-y-full', 'opacity-0');
+                        smsBox.classList.add('translate-y-4', 'opacity-100');
+                        setTimeout(() => {
+                            smsBox.classList.remove('translate-y-4', 'opacity-100');
+                            smsBox.classList.add('-translate-y-full', 'opacity-0');
+                        }, 6000);
+                    }
+                }, 1000);
+
+                // 7. TIMER CHALU KARO
+                startFarmerOtpTimer(farmerName, phone);
+
+            } catch (error) {
+                console.error("❌ Maha Error:", error);
+                showToast("Network Error! Check Console.");
+            }
+        }
+
+        // ==========================================
+        // 🌟 TIMER & RESEND LOGIC (FIXED)
+        // ==========================================
+        function startFarmerOtpTimer(fName, fPhone) {
             clearInterval(farmerOtpTimerInterval); 
             let timeLeft = 30; 
             const resendText = document.getElementById('resendText');
+            
             if(resendText) {
                 resendText.className = "text-sm text-gray-500 mt-4 font-medium text-center";
                 resendText.onclick = null; 
@@ -486,9 +536,33 @@
                         clearInterval(farmerOtpTimerInterval);
                         resendText.className = "text-sm text-emerald-600 mt-4 font-bold cursor-pointer hover:underline text-center";
                         resendText.innerHTML = `Resend OTP`;
-                        resendText.onclick = function() {
+                        
+                        // Jab kisan Resend dabayega
+                        resendText.onclick = async function() {
                             showToast('New OTP Sent!', '📨');
-                            triggerVirtualSMS(); startFarmerOtpTimer();
+                            window.currentGeneratedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+                            
+                            // Resend ka log db me daalo
+                            await db.collection('otp_logs').add({
+                                Name: fName,    
+                                Phone: fPhone,
+                                Process: "Resend OTP",
+                                OTP: window.currentGeneratedOTP,
+                                Time: new Date().toLocaleString('en-IN')
+                            });
+
+                            // SMS wapas dikhao
+                            const smsBox = document.getElementById('virtualSmsNotification');
+                            if(smsBox) {
+                                document.getElementById('virtualSmsText').innerHTML = `<b>KisanCart Partner:</b> Your OTP is <b class="text-emerald-600 text-lg">${window.currentGeneratedOTP}</b>. 🌾`;
+                                smsBox.classList.remove('-translate-y-full', 'opacity-0');
+                                smsBox.classList.add('translate-y-4', 'opacity-100');
+                                setTimeout(() => {
+                                    smsBox.classList.remove('translate-y-4', 'opacity-100');
+                                    smsBox.classList.add('-translate-y-full', 'opacity-0');
+                                }, 6000);
+                            }
+                            startFarmerOtpTimer(fName, fPhone);
                         };
                     }
                 }, 1000);
@@ -534,7 +608,7 @@
         }
 
         // ==========================================
-        // 🌟 4. DASHBOARD & FIREBASE REAL-TIME DATA (SINGLE COLLECTION LOGIC)
+        // 🌟 6. DASHBOARD & FIREBASE REAL-TIME DATA (SINGLE COLLECTION LOGIC)
         // ==========================================
         function loadDashboardData(phone) {
             const authSection = document.getElementById('farmerAuthSection');
@@ -651,7 +725,7 @@
         }
 
         // ==========================================
-        // 🌟 5. UTILITIES (Toast)
+        // 🌟 7. UTILITIES (Toast)
         // ==========================================
         function showToast(msg) {
             const toast = document.getElementById('farmerToast');
